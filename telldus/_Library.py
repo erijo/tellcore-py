@@ -1,5 +1,25 @@
-from ctypes import c_int, c_char_p, c_ulong, string_at
+# Copyright (c) 2012 Erik Johansson <erik@ejohansson.se>
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+# USA
+
+from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong
+from ctypes import byref, create_string_buffer, POINTER, sizeof, string_at
 import platform
+
+from utils import TelldusError
 
 class _Library:
     _lib = None
@@ -10,35 +30,101 @@ class _Library:
         'tdClose': [None, []],
         'tdReleaseString': [None, [c_ulong]],
         'tdGetErrorString': [c_char_p, [c_int]],
+
+        # 'tdRegisterDeviceEvent': [c_int, [TDDeviceEvent, c_void_p]],
+        # 'tdRegisterDeviceChangeEvent':
+        #     [c_int, [TDDeviceChangeEvent, c_void_p]],
+        # 'tdRegisterRawDeviceEvent': [c_int, [TDRawDeviceEvent, c_void_p]],
+        # 'tdRegisterSensorEvent': [c_int, [TDSensorEvent, c_void_p]],
+        # 'tdRegisterControllerEvent': [c_int, [TDControllerEvent, c_void_p]],
+        'tdUnregisterCallback': [c_int, [c_int]],
+
+        'tdTurnOn': [c_int, [c_int]],
+        'tdTurnOff': [c_int, [c_int]],
+        'tdBell': [c_int, [c_int]],
+        'tdDim': [c_int, [c_int, c_ubyte]],
+        'tdExecute': [c_int, [c_int]],
+        'tdUp': [c_int, [c_int]],
+        'tdDown': [c_int, [c_int]],
+        'tdStop': [c_int, [c_int]],
+        'tdLearn': [c_int, [c_int]],
+        'tdMethods': [c_int, [c_int, c_int]],
+        'tdLastSentCommand': [c_int, [c_int, c_int]],
+        'tdLastSentValue': [c_char_p, [c_int]],
+
         'tdGetNumberOfDevices': [c_int, []],
-    }
+        'tdGetDeviceId': [c_int, [c_int]],
+        'tdGetDeviceType': [c_int, [c_int]],
+
+        'tdGetName': [c_char_p, [c_int]],
+        'tdSetName': [c_bool, [c_int, c_char_p]],
+        'tdGetProtocol': [c_char_p, [c_int]],
+        'tdSetProtocol': [c_bool, [c_int, c_char_p]],
+        'tdGetModel': [c_char_p, [c_int]],
+        'tdSetModel': [c_bool, [c_int, c_char_p]],
+
+        'tdGetDeviceParameter': [c_char_p, [c_int, c_char_p, c_char_p]],
+        'tdSetDeviceParameter': [c_bool, [c_int, c_char_p, c_char_p]],
+
+        'tdAddDevice': [c_int, []],
+        'tdRemoveDevice': [c_bool, [c_int]],
+
+        'tdSendRawCommand': [c_int, [c_char_p, c_int]],
+
+        'tdConnectTellStickController': [None, [c_int, c_int, c_char_p]],
+        'tdDisconnectTellStickController': [None, [c_int, c_int, c_char_p]],
+
+        'tdSensor': [c_int, [c_char_p, c_int, c_char_p, c_int,
+                             POINTER(c_int), POINTER(c_int)]],
+        'tdSensorValue': [c_int, [c_char_p, c_char_p, c_int, c_int,
+                                  c_char_p, c_int, POINTER(c_int)]],
+
+        'tdController': [c_int, [POINTER(c_int), POINTER(c_int),
+                                 c_char_p, c_int, POINTER(c_int)]],
+        'tdControllerValue': [c_int, [c_int, c_char_p, c_char_p, c_int]],
+        'tdSetControllerValue': [c_int, [c_int, c_char_p, c_char_p]],
+        'tdRemoveController': [c_int, [c_int]],
+   }
 
     _private_functions = [ 'tdInit', 'tdClose', 'tdReleaseString' ]
 
-    def _make_string_releaser(self, name):
-        def caller(self, *args):
-            pointer = _Library._lib[name](*args)
-            string = string_at(pointer)
-            _Library._lib.tdReleaseString(pointer)
-            return string
-        return caller
-
     def _setup_functions(self, lib):
-        for name, signature in _Library._functions.iteritems():
-            lib[name].restype = signature[0]
-            lib[name].argtypes = signature[1]
+        def check_result(result, func, args):
+            if result < 0:
+                raise TelldusError(result)
+            return result
 
-            if name in _Library._private_functions:
+        def free_string(result, func, args):
+            if result != 0:
+                string = string_at(result)
+                lib.tdReleaseString(result)
+                return string
+            return None
+
+        for name, signature in self._functions.iteritems():
+            func = getattr(lib, name)
+            func.restype = signature[0]
+            func.argtypes = signature[1]
+
+            if func.restype == c_int:
+                func.errcheck = check_result
+            elif func.restype == c_char_p:
+                func.restype = c_ulong
+                func.errcheck = free_string
+
+            if name in self._private_functions:
+                continue
+            if name in self.__class__.__dict__:
                 continue
 
-            if signature[0] == c_char_p:
-                lib[name].restype = c_ulong                        
-                setattr(self.__class__, name,
-                        self._make_string_releaser(name))
-            else:
-                setattr(self.__class__, name, lib[name])
+            setattr(self.__class__, name, func)
 
     def __init__(self):
+        """Load and initialize the Telldus core library.
+
+        The library is only initialized the first time this object is
+        created. Subsequent instances uses the same library instance.
+        """
         if _Library._lib is None:
             assert _Library._refcount == 0
 
@@ -56,9 +142,56 @@ class _Library:
         _Library._refcount += 1
 
     def __del__(self):
-        assert _Library._refcount >= 1
+        """Close and unload the Telldus core library.
 
+        Only closed and unloaded if this is the last instance sharing the same
+        library instance.
+        """
+        # Happens if the LoadLibrary call fails
+        if _Library._lib is None:
+            assert _Library._refcount == 0
+            return
+
+        assert _Library._refcount >= 1
         _Library._refcount -= 1
+
         if _Library._refcount == 0:
             _Library._lib.tdClose()
             _Library._lib = None
+
+    def tdSensor(self):
+        protocol = create_string_buffer(20)
+        model = create_string_buffer(20)
+        id_ = c_int()
+        datatypes = c_int()
+
+        self._lib.tdSensor(protocol, sizeof(protocol), model, sizeof(model),
+                           byref(id_), byref(datatypes))
+        return { 'protocol': protocol.value, 'model': model.value,
+                 'id': id_.value, 'datatypes': datatypes.value }
+
+    def tdSensorValue(self, protocol, model, id_, dataType):
+        value = create_string_buffer(20)
+        timestamp = c_int()
+
+        self._lib.tdSensorValue(protocol, model, id_, dataType,
+                                value, sizeof(value), byref(timestamp))
+        return { 'value': value.value, 'timestamp': timestamp.value }
+
+    def tdController(self):
+        controllerId = c_int()
+        controllerType = c_int()
+        name = create_string_buffer(255)
+        available = c_int()
+
+        self._lib.tdController(byref(controllerId), byref(controllerType),
+                               name, sizeof(name), byref(available))
+        return { 'controllerId': controllerId.value,
+                 'controllerType': controllerType.value,
+                 'name': name.value, 'available': available.value}
+
+    def tdControllerValue(self, controllerId, name):
+        value = create_string_buffer(255)
+
+        self._lib.tdControllerValue(controllerId, name, value, sizeof(value))
+        return { 'value': value.value }
