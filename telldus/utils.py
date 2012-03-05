@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import _Library
+import library
 
 class TelldusError(Exception):
     def __init__(self, error):
@@ -23,6 +23,5 @@ class TelldusError(Exception):
         self.error = error
 
     def __str__(self):
-        lib = _Library._Library()
-        return "%s (%d)" % (lib.tdGetErrorString(self.error),
-                            self.error)
+        msg = library.Library().tdGetErrorString(self.error)
+        return "%s (%d)" % (msg, self.error)

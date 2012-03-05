@@ -21,7 +21,7 @@ import platform
 
 from utils import TelldusError
 
-class _Library:
+class Library:
     _lib = None
     _refcount = 0
 
@@ -125,8 +125,8 @@ class _Library:
         The library is only initialized the first time this object is
         created. Subsequent instances uses the same library instance.
         """
-        if _Library._lib is None:
-            assert _Library._refcount == 0
+        if Library._lib is None:
+            assert Library._refcount == 0
 
             if platform.system() == 'Windows':
                 from ctypes import windll
@@ -137,9 +137,9 @@ class _Library:
 
             self._setup_functions(lib)
             lib.tdInit()
-            _Library._lib = lib
+            Library._lib = lib
 
-        _Library._refcount += 1
+        Library._refcount += 1
 
     def __del__(self):
         """Close and unload the Telldus core library.
@@ -148,16 +148,16 @@ class _Library:
         library instance.
         """
         # Happens if the LoadLibrary call fails
-        if _Library._lib is None:
-            assert _Library._refcount == 0
+        if Library._lib is None:
+            assert Library._refcount == 0
             return
 
-        assert _Library._refcount >= 1
-        _Library._refcount -= 1
+        assert Library._refcount >= 1
+        Library._refcount -= 1
 
-        if _Library._refcount == 0:
-            _Library._lib.tdClose()
-            _Library._lib = None
+        if Library._refcount == 0:
+            Library._lib.tdClose()
+            Library._lib = None
 
     def tdSensor(self):
         protocol = create_string_buffer(20)
