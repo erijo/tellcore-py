@@ -19,7 +19,16 @@ from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong
 from ctypes import byref, create_string_buffer, POINTER, sizeof, string_at
 import platform
 
-from utils import TelldusError
+class TelldusError(Exception):
+    """Error returned from Telldus API.
+    """
+    def __init__(self, error):
+        Exception.__init__(self)
+        self.error = error
+
+    def __str__(self):
+        msg = Library().tdGetErrorString(self.error)
+        return "%s (%d)" % (msg, self.error)
 
 class Library:
     _lib = None
