@@ -18,10 +18,11 @@
 import _Library
 
 class TelldusError(Exception):
-    def __init__(self, value):
+    def __init__(self, error):
         Exception.__init__(self)
-        self.value = value
+        self.error = error
 
     def __str__(self):
         lib = _Library._Library()
-        return lib.tdGetErrorString(self.value)
+        return "%s (%d)" % (lib.tdGetErrorString(self.error),
+                            self.error)
