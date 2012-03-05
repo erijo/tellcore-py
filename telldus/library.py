@@ -30,7 +30,7 @@ class TelldusError(Exception):
         msg = Library().tdGetErrorString(self.error)
         return "%s (%d)" % (msg, self.error)
 
-class Library:
+class Library(object):
     _lib = None
     _refcount = 0
 
@@ -134,6 +134,7 @@ class Library:
         The library is only initialized the first time this object is
         created. Subsequent instances uses the same library instance.
         """
+        object.__init__(self)
         if Library._lib is None:
             assert Library._refcount == 0
 
