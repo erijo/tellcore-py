@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong
+from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong, c_void_p
 from ctypes import byref, create_string_buffer, POINTER, sizeof, string_at
 import platform
 
@@ -30,6 +30,19 @@ class TelldusError(Exception):
         msg = Library().tdGetErrorString(self.error)
         return "%s (%d)" % (msg, self.error)
 
+if platform.system() == 'Windows':
+    from ctypes import WINFUNCTYPE as FUNCTYPE
+else:
+    from ctypes import CFUNCTYPE as FUNCTYPE
+
+DEVICE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_char_p, c_int, c_void_p)
+DEVICE_CHANGE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_int, c_int, c_void_p)
+RAW_DEVICE_EVENT_FUNC = FUNCTYPE(None, c_char_p, c_int, c_int, c_void_p)
+SENSOR_EVENT_FUNC = FUNCTYPE(None, c_char_p, c_char_p, c_int, c_int, c_char_p,
+                             c_int, c_int, c_void_p)
+CONTROLLER_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_int, c_char_p,
+                                 c_int, c_void_p)
+
 class Library(object):
     _lib = None
     _refcount = 0
@@ -40,12 +53,13 @@ class Library(object):
         'tdReleaseString': [None, [c_ulong]],
         'tdGetErrorString': [c_char_p, [c_int]],
 
-        # 'tdRegisterDeviceEvent': [c_int, [TDDeviceEvent, c_void_p]],
-        # 'tdRegisterDeviceChangeEvent':
-        #     [c_int, [TDDeviceChangeEvent, c_void_p]],
-        # 'tdRegisterRawDeviceEvent': [c_int, [TDRawDeviceEvent, c_void_p]],
-        # 'tdRegisterSensorEvent': [c_int, [TDSensorEvent, c_void_p]],
-        # 'tdRegisterControllerEvent': [c_int, [TDControllerEvent, c_void_p]],
+        'tdRegisterDeviceEvent': [c_int, [DEVICE_EVENT_FUNC, c_void_p]],
+        'tdRegisterDeviceChangeEvent':
+            [c_int, [DEVICE_CHANGE_EVENT_FUNC, c_void_p]],
+        'tdRegisterRawDeviceEvent': [c_int, [RAW_DEVICE_EVENT_FUNC, c_void_p]],
+        'tdRegisterSensorEvent': [c_int, [SENSOR_EVENT_FUNC, c_void_p]],
+        'tdRegisterControllerEvent':
+            [c_int, [CONTROLLER_EVENT_FUNC, c_void_p]],
         'tdUnregisterCallback': [c_int, [c_int]],
 
         'tdTurnOn': [c_int, [c_int]],
@@ -110,7 +124,7 @@ class Library(object):
                 return string
             return None
 
-        for name, signature in self._functions.iteritems():
+        for name, signature in self._functions.items():
             func = getattr(lib, name)
             func.restype = signature[0]
             func.argtypes = signature[1]
@@ -135,6 +149,8 @@ class Library(object):
         created. Subsequent instances uses the same library instance.
         """
         object.__init__(self)
+        self._callbacks = {}
+
         if Library._lib is None:
             assert Library._refcount == 0
 
@@ -162,12 +178,53 @@ class Library(object):
             assert Library._refcount == 0
             return
 
+        for callback in self._callbacks.keys():
+            try:
+                self.tdUnregisterCallback(callback)
+            except:
+                pass
+
         assert Library._refcount >= 1
         Library._refcount -= 1
 
         if Library._refcount == 0:
             Library._lib.tdClose()
             Library._lib = None
+
+    def tdRegisterDeviceEvent(self, callback):
+        func = DEVICE_EVENT_FUNC(callback)
+        id_ = self._lib.tdRegisterDeviceEvent(func, None)
+        self._callbacks[id_] = func
+        return id_
+
+    def tdRegisterDeviceChangeEvent(self, callback):
+        func = DEVICE_CHANGE_EVENT_FUNC(callback)
+        id_ = self._lib.tdRegisterDeviceChangeEvent(func, None)
+        self._callbacks[id_] = func
+        return id_
+
+    def tdRegisterRawDeviceEvent(self, callback):
+        func = RAW_DEVICE_EVENT_FUNC(callback)
+        id_ = self._lib.tdRegisterRawDeviceEvent(func, None)
+        self._callbacks[id_] = func
+        return id_
+
+    def tdRegisterSensorEvent(self, callback):
+        func = SENSOR_EVENT_FUNC(callback)
+        id_ = self._lib.tdRegisterSensorEvent(func, None)
+        self._callbacks[id_] = func
+        return id_
+
+    def tdRegisterControllerEvent(self, callback):
+        func = CONTROLLER_EVENT_FUNC(callback)
+        id_ = self._lib.tdRegisterControllerEvent(func, None)
+        self._callbacks[id_] = func
+        return id_
+
+    def tdUnregisterCallback(self, id_):
+        self._lib.tdUnregisterCallback(id_)
+        if id_ in self._callbacks:
+            del self._callbacks[id_]
 
     def tdSensor(self):
         protocol = create_string_buffer(20)
