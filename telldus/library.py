@@ -31,9 +31,11 @@ class TelldusError(Exception):
         return "%s (%d)" % (msg, self.error)
 
 if platform.system() == 'Windows':
-    from ctypes import WINFUNCTYPE as FUNCTYPE
+    from ctypes import WINFUNCTYPE as FUNCTYPE, windll as dll
+    LIBRARY_NAME = 'TelldusCore.dll'
 else:
-    from ctypes import CFUNCTYPE as FUNCTYPE
+    from ctypes import CFUNCTYPE as FUNCTYPE, cdll as dll
+    LIBRARY_NAME = 'libtelldus-core.so.2'
 
 DEVICE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_char_p, c_int, c_void_p)
 DEVICE_CHANGE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_int, c_int, c_void_p)
@@ -142,7 +144,7 @@ class Library(object):
 
             setattr(self.__class__, name, func)
 
-    def __init__(self):
+    def __init__(self, name=LIBRARY_NAME):
         """Load and initialize the Telldus core library.
 
         The library is only initialized the first time this object is
@@ -154,13 +156,7 @@ class Library(object):
         if Library._lib is None:
             assert Library._refcount == 0
 
-            if platform.system() == 'Windows':
-                from ctypes import windll
-                lib = windll.LoadLibrary('TelldusCore.dll')
-            else:
-                from ctypes import cdll
-                lib = cdll.LoadLibrary('libtelldus-core.so.2')
-
+            lib = dll.LoadLibrary(name)
             self._setup_functions(lib)
             lib.tdInit()
             Library._lib = lib
