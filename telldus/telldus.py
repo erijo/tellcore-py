@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-from library import *
+from .library import *
 
 class TelldusCore(object):
     def __init__(self):
@@ -36,7 +36,7 @@ class TelldusCore(object):
         device.protocol = protocol
         if model is not None:
             device.model = model
-        for key, value in parameters.iteritems():
+        for key, value in parameters.items():
             device.set_parameter(key, value)
         return device
 
