@@ -174,7 +174,7 @@ class Library(object):
             assert Library._refcount == 0
             return
 
-        for callback in self._callbacks.keys():
+        for callback in list(self._callbacks.keys()):
             try:
                 self.tdUnregisterCallback(callback)
             except:
