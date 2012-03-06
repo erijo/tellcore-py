@@ -56,6 +56,8 @@ class Device(object):
             func = self.lib.tdGetProtocol
         elif name == 'model':
             func = self.lib.tdGetModel
+        elif name == 'type':
+            func = self.lib.tdGetDeviceType
         else:
             raise AttributeError(name)
         return func(self.id_)
