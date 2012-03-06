@@ -30,6 +30,17 @@ class TelldusCore(object):
             devices.append(Device(id_))
         return devices
 
+    def sensors(self):
+        sensors = []
+        try:
+            sensor = self.lib.tdSensor()
+            sensor['id_'] = sensor['id']
+            del sensor['id']
+            sensors.append(Sensor(**sensor))
+        except TelldusError:
+            pass
+        return sensors
+
     def add_device(self, name, protocol, model=None, **parameters):
         device = Device(self.lib.tdAddDevice())
         device.name = name
@@ -118,3 +129,16 @@ class Device(object):
 
     def last_sent_value(self):
         return self.lib.tdLastSentValue(self.id_)
+
+class Sensor(object):
+    def __init__(self, protocol, model, id_, datatypes):
+        object.__init__(self)
+        self.protocol = protocol
+        self.model = model
+        self.id_ = id_
+        self.datatypes = datatypes
+        self.lib = Library()
+
+    def value(self, datatype):
+        return self.lib.tdSensorValue(self.protocol, self.model, self.id_,
+                                      datatype)
