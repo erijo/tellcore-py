@@ -111,8 +111,6 @@ class Library(object):
         'tdRemoveController': [c_int, [c_int]],
    }
 
-    _private_functions = [ 'tdInit', 'tdClose', 'tdReleaseString' ]
-
     def _setup_functions(self, lib):
         def check_result(result, func, args):
             if result < 0:
@@ -137,8 +135,6 @@ class Library(object):
                 func.restype = c_ulong
                 func.errcheck = free_string
 
-            if name in self._private_functions:
-                continue
             if name in self.__class__.__dict__:
                 continue
 
@@ -186,6 +182,15 @@ class Library(object):
         if Library._refcount == 0:
             Library._lib.tdClose()
             Library._lib = None
+
+    def tdInit(self):
+        raise NotImplementedError('should not be called explicitly')
+
+    def tdClose(self):
+        raise NotImplementedError('should not be called explicitly')
+
+    def tdReleaseString(self, string):
+        raise NotImplementedError('should not be called explicitly')
 
     def tdRegisterDeviceEvent(self, callback):
         func = DEVICE_EVENT_FUNC(callback)
