@@ -238,11 +238,11 @@ class Library(object):
         return { 'protocol': protocol.value, 'model': model.value,
                  'id': id_.value, 'datatypes': datatypes.value }
 
-    def tdSensorValue(self, protocol, model, id_, dataType):
+    def tdSensorValue(self, protocol, model, id_, datatype):
         value = create_string_buffer(20)
         timestamp = c_int()
 
-        self._lib.tdSensorValue(protocol, model, id_, dataType,
+        self._lib.tdSensorValue(protocol, model, id_, datatype,
                                 value, sizeof(value), byref(timestamp))
         return { 'value': value.value, 'timestamp': timestamp.value }
 
