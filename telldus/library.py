@@ -135,11 +135,6 @@ class Library(object):
                 func.restype = c_ulong
                 func.errcheck = free_string
 
-            if name in self.__class__.__dict__:
-                continue
-
-            setattr(self.__class__, name, func)
-
     def __init__(self, name=LIBRARY_NAME):
         """Load and initialize the Telldus core library.
 
@@ -182,6 +177,9 @@ class Library(object):
         if Library._refcount == 0:
             Library._lib.tdClose()
             Library._lib = None
+
+    def __getattr__(self, name):
+        return getattr(self._lib, name)
 
     def tdInit(self):
         raise NotImplementedError('should not be called explicitly')
