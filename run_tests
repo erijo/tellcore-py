@@ -4,7 +4,7 @@ result=0
 
 export PYTHONPATH=$(dirname $0):$PYTHONPATH
 
-for test in test/test_*.py; do
+for test in $(dirname $0)/test/test_*.py; do
     if ! python $test; then
 	result=1
     fi
