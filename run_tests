@@ -1,13 +1,9 @@
-#!/bin/sh
+#!/usr/bin/python
 
-result=0
+import sys
+import unittest
 
-export PYTHONPATH=$(dirname $0):$PYTHONPATH
+tests = unittest.TestLoader().discover("test")
+res = unittest.runner.TextTestRunner().run(tests)
 
-for test in $(dirname $0)/test/test_*.py; do
-    if ! python $test; then
-	result=1
-    fi
-done
-
-exit $result
+sys.exit(not res.wasSuccessful())
