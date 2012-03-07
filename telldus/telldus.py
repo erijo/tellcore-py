@@ -51,6 +51,15 @@ class TelldusCore(object):
             device.set_parameter(key, value)
         return device
 
+    def send_raw_command(self, command, reserved=0):
+        return self.lib.tdSendRawCommand(command, reserved)
+
+    def connect_controller(self, vid, pid, serial):
+        self.lib.tdConnectTellStickController(vid, pid, serial)
+
+    def disconnect_controller(self, vid, pid, serial):
+        self.lib.tdDisconnectTellStickController(vid, pid, serial)
+
 class Device(object):
     def __init__(self, id_):
         object.__init__(self)
