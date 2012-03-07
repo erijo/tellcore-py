@@ -179,7 +179,9 @@ class Library(object):
             Library._lib = None
 
     def __getattr__(self, name):
-        return getattr(self._lib, name)
+        if name in self._functions:
+            return getattr(self._lib, name)
+        raise AttributeError(name)
 
     def tdInit(self):
         raise NotImplementedError('should not be called explicitly')
