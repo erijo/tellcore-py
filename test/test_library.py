@@ -19,8 +19,10 @@ import unittest
 
 import mocklib
 import telldus.library
+from telldus.constants import *
 
 Library = telldus.library.Library
+TelldusError = telldus.library.TelldusError
 telldus.library.string_at = lambda x: x
 
 class Test(unittest.TestCase):
@@ -111,8 +113,18 @@ class Test(unittest.TestCase):
         self.assertEqual(len(registered_ids), 5)
         self.assertEqual(len(unregistered_ids), 0)
         lib = None
-        self.assertEqual(len(unregistered_ids), 5)
         self.assertEqual(registered_ids, unregistered_ids)
+
+    def test_exception_on_error(self):
+        def tdGetNumberOfDevices():
+            return TELLSTICK_ERROR_CONNECTING_SERVICE
+        self.mocklib.tdGetNumberOfDevices = tdGetNumberOfDevices
+
+        lib = Library()
+        with self.assertRaises(TelldusError) as cm:
+            lib.tdGetNumberOfDevices()
+        self.assertEqual(cm.exception.error,
+                         TELLSTICK_ERROR_CONNECTING_SERVICE)
 
 if __name__ == '__main__':
     unittest.main()
