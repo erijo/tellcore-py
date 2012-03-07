@@ -82,5 +82,37 @@ class Test(unittest.TestCase):
         self.assertEqual(len(released), 5)
         self.assertEqual(returned, released)
 
+    def test_callback_cleanup(self):
+        registered_ids = []
+        def tdRegisterEvent(*args):
+            id_ = len(registered_ids) + 1
+            registered_ids.append(id_)
+            return id_
+        self.mocklib.tdRegisterDeviceEvent = tdRegisterEvent
+        self.mocklib.tdRegisterDeviceChangeEvent = tdRegisterEvent
+        self.mocklib.tdRegisterRawDeviceEvent = tdRegisterEvent
+        self.mocklib.tdRegisterSensorEvent = tdRegisterEvent
+        self.mocklib.tdRegisterControllerEvent = tdRegisterEvent
+
+        unregistered_ids = []
+        def tdUnregisterCallback(id_):
+            unregistered_ids.append(id_)
+        self.mocklib.tdUnregisterCallback = tdUnregisterCallback
+
+        def callback(*args): pass
+
+        lib = Library()
+        lib.tdRegisterDeviceEvent(callback)
+        lib.tdRegisterDeviceChangeEvent(callback)
+        lib.tdRegisterRawDeviceEvent(callback)
+        lib.tdRegisterSensorEvent(callback)
+        lib.tdRegisterControllerEvent(callback)
+
+        self.assertEqual(len(registered_ids), 5)
+        self.assertEqual(len(unregistered_ids), 0)
+        lib = None
+        self.assertEqual(len(unregistered_ids), 5)
+        self.assertEqual(registered_ids, unregistered_ids)
+
 if __name__ == '__main__':
     unittest.main()
