@@ -1,0 +1,13 @@
+#!/bin/sh
+
+result=0
+
+export PYTHONPATH=$(dirname $0):$PYTHONPATH
+
+for test in test/test_*.py; do
+    if ! python $test; then
+	result=1
+    fi
+done
+
+exit $result
