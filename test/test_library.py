@@ -27,7 +27,24 @@ telldus.library.string_at = lambda x: x
 
 class Test(unittest.TestCase):
     def setUp(self):
+        self.initialized = False
         self.mocklib = mocklib.MockTelldusCoreLib()
+
+        def tdInit():
+            if self.initialized:
+                raise RuntimeError("already initialized")
+            self.initialized = True
+        self.mocklib.tdInit = tdInit
+
+        def tdClose():
+            if not self.initialized:
+                raise RuntimeError("not initialized")
+            self.initialized = False
+        self.mocklib.tdClose = tdClose
+
+        self.mocklib.tdGetErrorString = lambda x: x
+        self.mocklib.tdReleaseString = lambda x: None
+
         self.loader = mocklib.MockLibLoader(self.mocklib)
         telldus.library.DllLoader = self.loader
 
@@ -48,16 +65,16 @@ class Test(unittest.TestCase):
         self.assertEqual(self.loader.load_count, 2)
 
     def test_initialized(self):
-        self.assertFalse(self.mocklib.initialized)
+        self.assertFalse(self.initialized)
         lib1 = Library()
-        self.assertTrue(self.mocklib.initialized)
+        self.assertTrue(self.initialized)
         lib2 = Library()
-        self.assertTrue(self.mocklib.initialized)
+        self.assertTrue(self.initialized)
 
         lib1 = None
-        self.assertTrue(self.mocklib.initialized)
+        self.assertTrue(self.initialized)
         lib2 = None
-        self.assertFalse(self.mocklib.initialized)
+        self.assertFalse(self.initialized)
 
     def test_private_methods(self):
         lib = Library()

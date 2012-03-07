@@ -28,22 +28,6 @@ class MockLibLoader(object):
         return self.mocklib
 
 class MockTelldusCoreLib(object):
-    def __init__(self):
-        object.__init__(self)
-        self.initialized = False
-
-        def tdInit():
-            if self.initialized:
-                raise RuntimeError("already initialized")
-            self.initialized = True
-        self.tdInit.implementation = tdInit
-
-        def tdClose():
-            if not self.initialized:
-                raise RuntimeError("not initialized")
-            self.initialized = False
-        self.tdClose.implementation = tdClose
-
     def __getattr__(self, name):
         if name in telldus.library.Library._functions:
             func = MockCFunction(name, self)
