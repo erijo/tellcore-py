@@ -47,9 +47,16 @@ class MockTelldusCoreLib(object):
     def __getattr__(self, name):
         if name in telldus.library.Library._functions:
             func = MockCFunction(name, self)
-            setattr(self, name, func)
+            object.__setattr__(self, name, func)
             return func
         raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        if name in telldus.library.Library._functions:
+            func = getattr(self, name)
+            func.implementation = value
+        else:
+            object.__setattr__(self, name, value)
 
 class MockCFunction(object):
     def __init__(self, name, lib):
@@ -60,9 +67,6 @@ class MockCFunction(object):
         self.restype = None
         self.argtypes = None
         self.errcheck = None
-
-    def __setattr__(self, name, value):
-        object.__setattr__(self, name, value)
 
     def __call__(self, *args):
         if self.implementation is None:

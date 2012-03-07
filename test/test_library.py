@@ -68,11 +68,11 @@ class Test(unittest.TestCase):
         released = []
         def tdReleaseString(pointer):
             released.append(pointer)
-        self.mocklib.tdReleaseString.implementation = tdReleaseString
+        self.mocklib.tdReleaseString = tdReleaseString
 
         def tdGetErrorString(error):
             return 0xdeadbeaf + error
-        self.mocklib.tdGetErrorString.implementation = tdGetErrorString
+        self.mocklib.tdGetErrorString = tdGetErrorString
 
         lib = Library()
         returned = []
