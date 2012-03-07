@@ -247,19 +247,18 @@ class Library(object):
         return { 'value': value.value, 'timestamp': timestamp.value }
 
     def tdController(self):
-        controllerId = c_int()
-        controllerType = c_int()
+        id_ = c_int()
+        type_ = c_int()
         name = create_string_buffer(255)
         available = c_int()
 
-        self._lib.tdController(byref(controllerId), byref(controllerType),
-                               name, sizeof(name), byref(available))
-        return { 'controllerId': controllerId.value,
-                 'controllerType': controllerType.value,
+        self._lib.tdController(byref(id_), byref(type_), name, sizeof(name),
+                               byref(available))
+        return { 'id': id_.value, 'type': type_.value,
                  'name': name.value, 'available': available.value}
 
     def tdControllerValue(self, controllerId, name):
         value = create_string_buffer(255)
 
         self._lib.tdControllerValue(controllerId, name, value, sizeof(value))
-        return { 'value': value.value }
+        return value.value

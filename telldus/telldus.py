@@ -15,6 +15,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
+from .constants import *
 from .library import *
 
 class TelldusCore(object):
@@ -40,6 +41,18 @@ class TelldusCore(object):
         except TelldusError:
             pass
         return sensors
+
+    def controllers(self):
+        controllers = []
+        try:
+            controller = self.lib.tdController()
+            controller['id_'] = controller['id']
+            controller['type_'] = controller['type']
+            del controller['id'], controller['type']
+            controllers.append(Controller(**controller))
+        except TelldusError:
+            pass
+        return controllers
 
     def add_device(self, name, protocol, model=None, **parameters):
         device = Device(self.lib.tdAddDevice())
@@ -151,3 +164,28 @@ class Sensor(object):
     def value(self, datatype):
         return self.lib.tdSensorValue(self.protocol, self.model, self.id_,
                                       datatype)
+
+class Controller(object):
+    def __init__(self, id_, type_, name, available):
+        object.__init__(self)
+        object.__setattr__(self, 'id', id_)
+        object.__setattr__(self, 'type', type_)
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'available', available)
+        object.__setattr__(self, 'lib', Library())
+    
+    def __getattr__(self, name):
+        try:
+            return self.lib.tdControllerValue(self.id, name)
+        except TelldusError as e:
+            if e.error == TELLSTICK_ERROR_METHOD_NOT_SUPPORTED:
+                raise AttributeError(name)
+            raise
+
+    def __setattr__(self, name, value):
+        try:
+            self.lib.tdSetControllerValue(self.id, name, value)
+        except TelldusError as e:
+            if e.error == TELLSTICK_ERROR_SYNTAX:
+                raise AttributeError(name)
+            raise
