@@ -31,10 +31,10 @@ class TelldusError(Exception):
         return "%s (%d)" % (msg, self.error)
 
 if platform.system() == 'Windows':
-    from ctypes import WINFUNCTYPE as FUNCTYPE, windll as dll
+    from ctypes import WINFUNCTYPE as FUNCTYPE, windll as DllLoader
     LIBRARY_NAME = 'TelldusCore.dll'
 else:
-    from ctypes import CFUNCTYPE as FUNCTYPE, cdll as dll
+    from ctypes import CFUNCTYPE as FUNCTYPE, cdll as DllLoader
     LIBRARY_NAME = 'libtelldus-core.so.2'
 
 DEVICE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_char_p, c_int, c_void_p)
@@ -152,7 +152,7 @@ class Library(object):
         if Library._lib is None:
             assert Library._refcount == 0
 
-            lib = dll.LoadLibrary(name)
+            lib = DllLoader.LoadLibrary(name)
             self._setup_functions(lib)
             lib.tdInit()
             Library._lib = lib
