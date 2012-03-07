@@ -76,11 +76,11 @@ class TelldusCore(object):
 class Device(object):
     def __init__(self, id_):
         object.__init__(self)
-        object.__setattr__(self, 'id_', id_)
+        object.__setattr__(self, 'id', id_)
         object.__setattr__(self, 'lib', Library())
 
     def remove(self):
-        return self.lib.tdRemoveDevice(self.id_)
+        return self.lib.tdRemoveDevice(self.id)
 
     def __getattr__(self, name):
         if name == 'name':
@@ -93,7 +93,7 @@ class Device(object):
             func = self.lib.tdGetDeviceType
         else:
             raise AttributeError(name)
-        return func(self.id_)
+        return func(self.id)
 
     def __setattr__(self, name, value):
         if name == 'name':
@@ -104,65 +104,65 @@ class Device(object):
             func = self.lib.tdSetModel
         else:
             raise AttributeError(name)
-        return func(self.id_, value)
+        return func(self.id, value)
 
     def __str__(self):
         desc = '/'.join([self.name, self.protocol, self.model])
-        return "device-%d [%s]" % (self.id_, desc)
+        return "device-%d [%s]" % (self.id, desc)
 
     def get_parameter(self, name, default_value):
-        return self.lib.tdGetDeviceParameter(self.id_, name, default_value)
+        return self.lib.tdGetDeviceParameter(self.id, name, default_value)
 
     def set_parameter(self, name, value):
-        return self.lib.tdSetDeviceParameter(self.id_, name, value)
+        return self.lib.tdSetDeviceParameter(self.id, name, value)
 
     def turn_on(self):
-        self.lib.tdTurnOn(self.id_)
+        self.lib.tdTurnOn(self.id)
 
     def turn_off(self):
-        self.lib.tdTurnOff(self.id_)
+        self.lib.tdTurnOff(self.id)
 
     def bell(self):
-        self.lib.tdBell(self.id_)
+        self.lib.tdBell(self.id)
 
     def dim(self, level):
-        self.lib.tdDim(self.id_, level)
+        self.lib.tdDim(self.id, level)
 
     def execute(self):
-        self.lib.tdExecute(self.id_)
+        self.lib.tdExecute(self.id)
 
     def up(self):
-        self.lib.tdUp(self.id_)
+        self.lib.tdUp(self.id)
 
     def down(self):
-        self.lib.tdDown(self.id_)
+        self.lib.tdDown(self.id)
 
     def stop(self):
-        self.lib.tdStop(self.id_)
+        self.lib.tdStop(self.id)
 
     def learn(self):
-        self.lib.tdLearn(self.id_)
+        self.lib.tdLearn(self.id)
 
     def methods(self, methods_supported):
-        return self.lib.tdMethods(self.id_, methods_supported)
+        return self.lib.tdMethods(self.id, methods_supported)
 
     def last_sent_command(self, methods_supported):
-        return self.lib.tdLastSentCommand(self.id_, methods_supported)
+        return self.lib.tdLastSentCommand(self.id, methods_supported)
 
     def last_sent_value(self):
-        return self.lib.tdLastSentValue(self.id_)
+        return self.lib.tdLastSentValue(self.id)
 
 class Sensor(object):
     def __init__(self, protocol, model, id_, datatypes):
         object.__init__(self)
         self.protocol = protocol
         self.model = model
-        self.id_ = id_
+        self.id = id_
         self.datatypes = datatypes
         self.lib = Library()
 
     def value(self, datatype):
-        return self.lib.tdSensorValue(self.protocol, self.model, self.id_,
+        return self.lib.tdSensorValue(self.protocol, self.model, self.id,
                                       datatype)
 
 class Controller(object):
