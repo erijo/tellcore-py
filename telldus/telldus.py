@@ -18,6 +18,7 @@
 from .constants import *
 from .library import *
 
+
 class TelldusCore(object):
     def __init__(self):
         object.__init__(self)

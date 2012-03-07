@@ -19,6 +19,26 @@ from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong, c_void_p
 from ctypes import byref, create_string_buffer, POINTER, sizeof, string_at
 import platform
 
+
+if platform.system() == 'Windows':
+    from ctypes import WINFUNCTYPE as FUNCTYPE, windll as DllLoader
+    LIBRARY_NAME = 'TelldusCore.dll'
+else:
+    from ctypes import CFUNCTYPE as FUNCTYPE, cdll as DllLoader
+    LIBRARY_NAME = 'libtelldus-core.so.2'
+
+DEVICE_EVENT_FUNC = FUNCTYPE(
+    None, c_int, c_int, c_char_p, c_int, c_void_p)
+DEVICE_CHANGE_EVENT_FUNC = FUNCTYPE(
+    None, c_int, c_int, c_int, c_int, c_void_p)
+RAW_DEVICE_EVENT_FUNC = FUNCTYPE(
+    None, c_char_p, c_int, c_int, c_void_p)
+SENSOR_EVENT_FUNC = FUNCTYPE(
+    None, c_char_p, c_char_p, c_int, c_int, c_char_p, c_int, c_int, c_void_p)
+CONTROLLER_EVENT_FUNC = FUNCTYPE(
+    None, c_int, c_int, c_int, c_char_p, c_int, c_void_p)
+
+
 class TelldusError(Exception):
     """Error returned from Telldus API.
     """
@@ -30,20 +50,6 @@ class TelldusError(Exception):
         msg = Library().tdGetErrorString(self.error)
         return "%s (%d)" % (msg, self.error)
 
-if platform.system() == 'Windows':
-    from ctypes import WINFUNCTYPE as FUNCTYPE, windll as DllLoader
-    LIBRARY_NAME = 'TelldusCore.dll'
-else:
-    from ctypes import CFUNCTYPE as FUNCTYPE, cdll as DllLoader
-    LIBRARY_NAME = 'libtelldus-core.so.2'
-
-DEVICE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_char_p, c_int, c_void_p)
-DEVICE_CHANGE_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_int, c_int, c_void_p)
-RAW_DEVICE_EVENT_FUNC = FUNCTYPE(None, c_char_p, c_int, c_int, c_void_p)
-SENSOR_EVENT_FUNC = FUNCTYPE(None, c_char_p, c_char_p, c_int, c_int, c_char_p,
-                             c_int, c_int, c_void_p)
-CONTROLLER_EVENT_FUNC = FUNCTYPE(None, c_int, c_int, c_int, c_char_p,
-                                 c_int, c_void_p)
 
 class Library(object):
     _lib = None
@@ -55,11 +61,14 @@ class Library(object):
         'tdReleaseString': [None, [c_ulong]],
         'tdGetErrorString': [c_char_p, [c_int]],
 
-        'tdRegisterDeviceEvent': [c_int, [DEVICE_EVENT_FUNC, c_void_p]],
+        'tdRegisterDeviceEvent':
+            [c_int, [DEVICE_EVENT_FUNC, c_void_p]],
         'tdRegisterDeviceChangeEvent':
             [c_int, [DEVICE_CHANGE_EVENT_FUNC, c_void_p]],
-        'tdRegisterRawDeviceEvent': [c_int, [RAW_DEVICE_EVENT_FUNC, c_void_p]],
-        'tdRegisterSensorEvent': [c_int, [SENSOR_EVENT_FUNC, c_void_p]],
+        'tdRegisterRawDeviceEvent':
+            [c_int, [RAW_DEVICE_EVENT_FUNC, c_void_p]],
+        'tdRegisterSensorEvent':
+            [c_int, [SENSOR_EVENT_FUNC, c_void_p]],
         'tdRegisterControllerEvent':
             [c_int, [CONTROLLER_EVENT_FUNC, c_void_p]],
         'tdUnregisterCallback': [c_int, [c_int]],
@@ -257,8 +266,8 @@ class Library(object):
         return { 'id': id_.value, 'type': type_.value,
                  'name': name.value, 'available': available.value}
 
-    def tdControllerValue(self, controllerId, name):
+    def tdControllerValue(self, id_, name):
         value = create_string_buffer(255)
 
-        self._lib.tdControllerValue(controllerId, name, value, sizeof(value))
+        self._lib.tdControllerValue(id_, name, value, sizeof(value))
         return value.value

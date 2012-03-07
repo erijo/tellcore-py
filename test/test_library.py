@@ -17,13 +17,15 @@
 
 import unittest
 
-import mocklib
 import telldus.library
 from telldus.constants import *
+
+import mocklib
 
 Library = telldus.library.Library
 TelldusError = telldus.library.TelldusError
 telldus.library.string_at = lambda x: x
+
 
 class Test(unittest.TestCase):
     def setUp(self):
