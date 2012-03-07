@@ -15,6 +15,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
+import telldus.library
+
 class MockLibLoader(object):
     def __init__(self, mocklib):
         object.__init__(self)
@@ -43,7 +45,7 @@ class MockTelldusCoreLib(object):
         self.tdClose.implementation = tdClose
 
     def __getattr__(self, name):
-        if name[0:2] == 'td':
+        if name in telldus.library.Library._functions:
             func = MockCFunction(name, self)
             setattr(self, name, func)
             return func
@@ -63,23 +65,23 @@ class MockCFunction(object):
         object.__setattr__(self, name, value)
 
     def __call__(self, *args):
+        if self.implementation is None:
+            raise NotImplementedError("%s is not implemented" % self.name)
+
         if self.argtypes is None:
             raise NotImplementedError("%s not configured" % self.name)
+
         if len(self.argtypes) != len(args):
             raise TypeError("%s() takes exactly %d argument(s) (%d given)" %
                             (self.name, len(self.argument), len(args)))
 
-        cargs = []
-        for c_type, value in map(None, self.argtypes, args):
-            if type(value) is c_type:
-                cargs.append(value)
-            else:
-                cargs.append(c_type(value))
+        # Verify that the arguments are of correct type
+        for c_type, value in zip(self.argtypes, args):
+            if type(value) is not c_type:
+                c_value = c_type(value)
 
-        res = self.implementation(*cargs)
+        res = self.implementation(*args)
 
         if self.errcheck is not None:
-            res = self.errcheck(res, self, cargs)
-        if self.restype is not None:
-            return self.restype(res).value
+            res = self.errcheck(res, self, args)
         return res

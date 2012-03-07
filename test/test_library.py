@@ -67,11 +67,11 @@ class Test(unittest.TestCase):
         """Test that all strings returned from core lib are released"""
         released = []
         def tdReleaseString(pointer):
-            released.append(pointer.value)
+            released.append(pointer)
         self.mocklib.tdReleaseString.implementation = tdReleaseString
 
         def tdGetErrorString(error):
-            return 0xdeadbeaf + error.value
+            return 0xdeadbeaf + error
         self.mocklib.tdGetErrorString.implementation = tdGetErrorString
 
         lib = Library()
