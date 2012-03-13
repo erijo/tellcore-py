@@ -118,6 +118,7 @@ class Test(unittest.TestCase):
         unregistered_ids = []
         def tdUnregisterCallback(id_):
             unregistered_ids.append(id_)
+            return TELLSTICK_SUCCESS
         self.mocklib.tdUnregisterCallback = tdUnregisterCallback
 
         def callback(*args): pass
