@@ -103,8 +103,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(released), 5)
         self.assertEqual(returned, released)
 
-    def test_callback_cleanup(self):
-        registered_ids = []
+    def setup_callback(self, registered_ids, unregistered_ids):
         def tdRegisterEvent(*args):
             id_ = len(registered_ids) + 1
             registered_ids.append(id_)
@@ -115,11 +114,15 @@ class Test(unittest.TestCase):
         self.mocklib.tdRegisterSensorEvent = tdRegisterEvent
         self.mocklib.tdRegisterControllerEvent = tdRegisterEvent
 
-        unregistered_ids = []
         def tdUnregisterCallback(id_):
             unregistered_ids.append(id_)
             return TELLSTICK_SUCCESS
         self.mocklib.tdUnregisterCallback = tdUnregisterCallback
+
+    def test_callback_cleanup(self):
+        registered_ids = []
+        unregistered_ids = []
+        self.setup_callback(registered_ids, unregistered_ids)
 
         def callback(*args): pass
 
@@ -134,6 +137,25 @@ class Test(unittest.TestCase):
         self.assertEqual(len(unregistered_ids), 0)
         lib = None
         self.assertEqual(registered_ids, unregistered_ids)
+
+    def test_callback_shared(self):
+        registered_ids = []
+        unregistered_ids = []
+        self.setup_callback(registered_ids, unregistered_ids)
+
+        def callback(*args): pass
+
+        lib = Library()
+        id_ = lib.tdRegisterDeviceEvent(callback)
+        self.assertEqual(len(registered_ids), 1)
+        self.assertEqual(len(unregistered_ids), 0)
+
+        lib_copy = Library()
+        lib = None
+
+        self.assertEqual(len(unregistered_ids), 0)
+        lib_copy.tdUnregisterCallback(id_)
+        self.assertEqual(len(unregistered_ids), 1)
 
     def test_exception_on_error(self):
         def tdGetNumberOfDevices():

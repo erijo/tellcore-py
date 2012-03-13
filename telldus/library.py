@@ -54,6 +54,7 @@ class TelldusError(Exception):
 class Library(object):
     _lib = None
     _refcount = 0
+    _callbacks = {}
 
     _functions = {
         'tdInit': [None, []],
@@ -151,7 +152,6 @@ class Library(object):
         created. Subsequent instances uses the same library instance.
         """
         object.__init__(self)
-        self._callbacks = {}
 
         if Library._lib is None:
             assert Library._refcount == 0
@@ -174,16 +174,16 @@ class Library(object):
             assert Library._refcount == 0
             return
 
-        for callback in list(self._callbacks.keys()):
-            try:
-                self.tdUnregisterCallback(callback)
-            except:
-                pass
-
         assert Library._refcount >= 1
         Library._refcount -= 1
 
         if Library._refcount == 0:
+            for callback in list(self._callbacks.keys()):
+                try:
+                    self.tdUnregisterCallback(callback)
+                except:
+                    pass
+
             Library._lib.tdClose()
             Library._lib = None
 
@@ -232,9 +232,8 @@ class Library(object):
         return id_
 
     def tdUnregisterCallback(self, id_):
+        del self._callbacks[id_]
         self._lib.tdUnregisterCallback(id_)
-        if id_ in self._callbacks:
-            del self._callbacks[id_]
 
     def tdSensor(self):
         protocol = create_string_buffer(20)
