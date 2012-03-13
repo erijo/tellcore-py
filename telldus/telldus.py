@@ -39,8 +39,10 @@ class TelldusCore(object):
             sensor['id_'] = sensor['id']
             del sensor['id']
             sensors.append(Sensor(**sensor))
-        except TelldusError:
-            pass
+        except TelldusError as e:
+            if e.error == TELLSTICK_ERROR_DEVICE_NOT_FOUND:
+                pass
+            raise
         return sensors
 
     def controllers(self):
@@ -51,8 +53,10 @@ class TelldusCore(object):
             controller['type_'] = controller['type']
             del controller['id'], controller['type']
             controllers.append(Controller(**controller))
-        except TelldusError:
-            pass
+        except TelldusError as e:
+            if e.error == TELLSTICK_ERROR_NOT_FOUND:
+                pass
+            raise
         return controllers
 
     def add_device(self, name, protocol, model=None, **parameters):
