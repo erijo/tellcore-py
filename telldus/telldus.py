@@ -84,9 +84,14 @@ class CallbackManager(object):
 
 
 class TelldusCore(object):
-    def __init__(self, callback_manager=None):
+    def __init__(self, library_path=None, callback_manager=None):
         object.__init__(self)
-        self.lib = Library()
+
+        if library_path is not None:
+            self.lib = Library(library_path)
+        else:
+            self.lib = Library()
+
         if callback_manager is not None:
             self.callbacks = callback_manager
         else:
@@ -171,6 +176,8 @@ class TelldusCore(object):
         self.lib.tdDisconnectTellStickController(vid, pid, serial)
 
 class Device(object):
+    PARAMETERS = [ "house", "unit", "code", "system", "units", "fade" ]
+
     def __init__(self, id_):
         object.__init__(self)
         object.__setattr__(self, 'id', id_)
@@ -206,6 +213,14 @@ class Device(object):
     def __str__(self):
         desc = '/'.join([self.name, self.protocol, self.model])
         return "device-%d [%s]" % (self.id, desc)
+
+    def parameters(self):
+        parameters = {}
+        for name in self.PARAMETERS:
+            value = self.get_parameter(name, "$%!")
+            if value != "$%!":
+                parameters[name] = value
+        return parameters
 
     def get_parameter(self, name, default_value):
         return self.lib.tdGetDeviceParameter(self.id, name, default_value)
