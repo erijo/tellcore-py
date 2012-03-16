@@ -1,5 +1,5 @@
 # Copyright (c) 2012 Erik Johansson <erik@ejohansson.se>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3 of the
@@ -15,14 +15,106 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
+import Queue
+
 from .constants import *
 from .library import *
 
 
-class TelldusCore(object):
+class CallbackManager(object):
     def __init__(self):
         object.__init__(self)
         self.lib = Library()
+        self.callbacks = {}
+        self.queue = Queue.Queue()
+
+    def __del__(self):
+        assert len(self.callbacks) == 0
+
+    def _callback(self, *args):
+        self.queue.put(args)
+
+    def process(self, **kwargs):
+        try:
+            args = self.queue.get(**kwargs)
+            try:
+                # args[-2] is callback id
+                callback = self.callbacks[args[-2]]
+                # args[-1] is context which is always None
+                callback(*args[:-1])
+            except KeyError:
+                pass
+            finally:
+                self.queue.task_done()
+        except Queue.Empty:
+            return False
+        return True
+
+    def process_pending(self):
+        while self.process(block=False):
+            pass
+
+    def _register(self, registrator, callback):
+        id_ = registrator(self._callback)
+        self.callbacks[id_] = callback
+        return id_
+
+    def register_device_event(self, callback):
+        return self._register(self.lib.tdRegisterDeviceEvent, callback)
+
+    def register_device_change_event(self, callback):
+        return self._register(self.lib.tdRegisterDeviceChangeEvent, callback)
+
+    def register_raw_device_event(self, callback):
+        return self._register(self.lib.tdRegisterRawDeviceEvent, callback)
+
+    def register_sensor_event(self, callback):
+        return self._register(self.lib.tdRegisterSensorEvent, callback)
+
+    def register_controller_event(self, callback):
+        return self._register(self.lib.tdRegisterControllerEvent, callback)
+
+    def unregister(self, id_):
+        del self.callbacks[id_]
+        self.lib.tdUnregisterCallback(id_)
+
+    def unregister_all(self):
+        for id_ in list(self.callbacks.keys()):
+            self.unregister(id_)
+
+
+class TelldusCore(object):
+    def __init__(self, callback_manager=None):
+        object.__init__(self)
+        self.lib = Library()
+        if callback_manager is not None:
+            self.callbacks = callback_manager
+        else:
+            self.callbacks = CallbackManager()
+
+    def __del__(self):
+        self.callbacks.unregister_all()
+
+    def register_device_event(self, callback):
+        return self.callbacks.register_device_event(callback)
+
+    def register_device_change_event(self, callback):
+        return self.callbacks.register_device_change_event(callback)
+
+    def register_raw_device_event(self, callback):
+        return self.callbacks.register_raw_device_event(callback)
+
+    def register_sensor_event(self, callback):
+        return self.callbacks.register_sensor_event(callback)
+
+    def register_controller_event(self, callback):
+        return self.callbacks.register_controller_event(callback)
+
+    def unregister_callback(self, id_):
+        return self.callbacks.unregister(id_)
+
+    def process_pending_callbacks(self):
+        self.callbacks.process_pending()
 
     def devices(self):
         devices = []
@@ -178,7 +270,7 @@ class Controller(object):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'available', available)
         object.__setattr__(self, 'lib', Library())
-    
+
     def __getattr__(self, name):
         try:
             return self.lib.tdControllerValue(self.id, name)

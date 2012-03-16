@@ -12,7 +12,6 @@ TODO
 ----
 
 * Extended the unit test for TelldusCore and friends.
-* Add better support for callbacks, including thread sync.
 * Test it with a real TellStick.
 * Improve documentation.
 * Make it a proper python package.
