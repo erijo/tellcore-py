@@ -176,7 +176,8 @@ class TelldusCore(object):
         self.lib.tdDisconnectTellStickController(vid, pid, serial)
 
 class Device(object):
-    PARAMETERS = [ "house", "unit", "code", "system", "units", "fade" ]
+    PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
+                  "fade"]
 
     def __init__(self, id_):
         object.__init__(self)
