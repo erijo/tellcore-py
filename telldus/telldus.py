@@ -86,6 +86,7 @@ class CallbackManager(object):
 class TelldusCore(object):
     def __init__(self, library_path=None, callback_manager=None):
         object.__init__(self)
+        self.callbacks = None
 
         if library_path is not None:
             self.lib = Library(library_path)
@@ -98,7 +99,8 @@ class TelldusCore(object):
             self.callbacks = CallbackManager()
 
     def __del__(self):
-        self.callbacks.unregister_all()
+        if self.callbacks is not None:
+            self.callbacks.unregister_all()
 
     def register_device_event(self, callback):
         return self.callbacks.register_device_event(callback)
