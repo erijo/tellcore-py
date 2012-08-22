@@ -15,7 +15,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import Queue
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 import threading
 
 import telldus.library
@@ -93,7 +96,7 @@ class MockEventDispatcher(threading.Thread):
         self.sensor_callbacks = []
         self.controller_callbacks = []
 
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.running = True
         self.start()
 

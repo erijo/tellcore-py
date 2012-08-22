@@ -15,7 +15,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import Queue
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 from .constants import *
 from .library import *
@@ -26,7 +29,7 @@ class CallbackManager(object):
         object.__init__(self)
         self.lib = Library()
         self.callbacks = {}
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
 
     def __del__(self):
         assert len(self.callbacks) == 0
@@ -46,7 +49,7 @@ class CallbackManager(object):
                 pass
             finally:
                 self.queue.task_done()
-        except Queue.Empty:
+        except queue.Empty:
             return False
         return True
 
