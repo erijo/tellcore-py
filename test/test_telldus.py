@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
         core = TelldusCore()
         self.event_tester(core, core.register_device_event,
                           self.mockdispatcher.trigger_device_event,
-                          (1, 2, "foo"))
+                          (1, 2, b"foo"))
 
     def test_device_change_event(self):
         core = TelldusCore()
@@ -76,19 +76,19 @@ class Test(unittest.TestCase):
         core = TelldusCore()
         self.event_tester(core, core.register_raw_device_event,
                           self.mockdispatcher.trigger_raw_device_event,
-                          ("bar", 6))
+                          (b"bar", 6))
         
     def test_sensor_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_sensor_event,
                           self.mockdispatcher.trigger_sensor_event,
-                          ("proto", "model", 7, 8, "value", 9))
+                          (b"proto", b"model", 7, 8, b"value", 9))
 
     def test_controller_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_controller_event,
                           self.mockdispatcher.trigger_controller_event,
-                          (10, 11, 12, "new"))
+                          (10, 11, 12, b"new"))
 
 
 if __name__ == '__main__':
