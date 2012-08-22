@@ -135,15 +135,19 @@ class Library(object):
             return None
 
         for name, signature in self._functions.items():
-            func = getattr(lib, name)
-            func.restype = signature[0]
-            func.argtypes = signature[1]
+            try:
+                func = getattr(lib, name)
+                func.restype = signature[0]
+                func.argtypes = signature[1]
 
-            if func.restype == c_int:
-                func.errcheck = check_result
-            elif func.restype == c_char_p:
-                func.restype = c_ulong
-                func.errcheck = free_string
+                if func.restype == c_int:
+                    func.errcheck = check_result
+                elif func.restype == c_char_p:
+                    func.restype = c_ulong
+                    func.errcheck = free_string
+            except AttributeError:
+                # Older version of the lib don't have all the functions
+                pass
 
     def __init__(self, name=LIBRARY_NAME):
         """Load and initialize the Telldus core library.
