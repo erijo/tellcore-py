@@ -38,7 +38,7 @@ def device_event(id_, method, data, cid):
     string = "[DEVICE] {0} -> {1}".format(id_, method_string)
     if method == TELLSTICK_DIM:
         string += " [{0}]".format(data)
-    print string
+    print(string)
 
 def device_change_event(id_, event, type_, cid):
     event_string = EVENTS.get(event, "UNKNOWN EVENT {0}".format(event))
@@ -46,16 +46,16 @@ def device_change_event(id_, event, type_, cid):
     if event == TELLSTICK_DEVICE_CHANGED:
         type_string = CHANGES.get(type_, "UNKNOWN CHANGE {0}".format(type_))
         string += " [{0}]".format(type_string)
-    print string
+    print(string)
 
 def raw_event(data, controller_id, cid):
     string = "[RAW] {0} <- {1}".format(controller_id, data)
-    print string
+    print(string)
 
 def sensor_event(protocol, model, id_, dataType, value, timestamp, cid):
     string = "[SENSOR] {0} [{1}/{2}] ({3}) @ {4} <- {5}".format(
         id_, protocol, model, dataType, timestamp, value)
-    print string
+    print(string)
 
 def controller_event(id_, event, type_, new_value, cid):
     event_string = EVENTS.get(event, "UNKNOWN EVENT {0}".format(event))
@@ -67,7 +67,7 @@ def controller_event(id_, event, type_, new_value, cid):
           or event == TELLSTICK_DEVICE_STATE_CHANGED):
         type_string = CHANGES.get(type_, "UNKNOWN CHANGE {0}".format(type_))
         string += " [{0}] -> {1}".format(type_string, new_value)
-    print string
+    print(string)
 
 
 parser = argparse.ArgumentParser(description='Listen for Telldus events.')
@@ -101,7 +101,7 @@ if args.controller or args.all:
     callbacks.append(core.register_controller_event(controller_event))
 
 if len(callbacks) == 0:
-    print "Must enable at least one event"
+    print("Must enable at least one event")
     parser.print_usage()
     sys.exit(1)
 
