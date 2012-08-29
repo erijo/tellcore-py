@@ -137,14 +137,14 @@ class TelldusCore(object):
     def sensors(self):
         sensors = []
         try:
-            sensor = self.lib.tdSensor()
-            sensor['id_'] = sensor['id']
-            del sensor['id']
-            sensors.append(Sensor(**sensor))
+            while True:
+                sensor = self.lib.tdSensor()
+                sensor['id_'] = sensor['id']
+                del sensor['id']
+                sensors.append(Sensor(**sensor))
         except TelldusError as e:
-            if e.error == TELLSTICK_ERROR_DEVICE_NOT_FOUND:
-                pass
-            raise
+            if e.error != TELLSTICK_ERROR_DEVICE_NOT_FOUND:
+                raise
         return sensors
 
     def controllers(self):

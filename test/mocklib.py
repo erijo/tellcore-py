@@ -19,9 +19,13 @@ try:
     import queue
 except ImportError:
     import Queue as queue
+
+import ctypes
 import threading
 
 import telldus.library
+
+ByRefArgType = type(ctypes.byref(ctypes.c_int(0)))
 
 class MockLibLoader(object):
     def __init__(self, mocklib):
@@ -72,7 +76,11 @@ class MockCFunction(object):
         # Verify that the arguments are of correct type
         for c_type, value in zip(self.argtypes, args):
             if type(value) is not c_type:
-                c_value = c_type(value)
+                # The 'raw' attribute is the pointer for string buffers
+                if hasattr(value, 'raw'):
+                    c_value = c_type(value.raw)
+                elif type(value) is not ByRefArgType:
+                    c_value = c_type(value)
 
         res = self.implementation(*args)
 

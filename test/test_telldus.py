@@ -18,6 +18,7 @@
 import unittest
 
 import telldus.telldus
+from telldus.constants import *
 
 import mocklib
 
@@ -90,6 +91,31 @@ class Test(unittest.TestCase):
                           self.mockdispatcher.trigger_controller_event,
                           (10, 11, 12, b"new"))
 
+    def test_sensors(self):
+        self.sensor_index = 0
+        def tdSensor(protocol, p_len, model, m_len, id_, datatypes):
+            sensors = [{'protocol': "proto_1", 'model': "model_1", 'id': 1,
+                        'datatypes': TELLSTICK_TEMPERATURE},
+                       {'protocol': "proto_2", 'model': "model_2", 'id': 2,
+                        'datatypes': TELLSTICK_TEMPERATURE},
+                       {'protocol': "proto_3", 'model': "model_3", 'id': 3,
+                        'datatypes': TELLSTICK_HUMIDITY}]
+            if self.sensor_index < len(sensors):
+                sensor = sensors[self.sensor_index]
+                self.sensor_index += 1
+                protocol = sensor['protocol']
+                model = sensor['model']
+                id_ = sensor['id']
+                datatypes = sensor['datatypes']
+                return TELLSTICK_SUCCESS
+            else:
+                self.sensor_index = 0
+                return TELLSTICK_ERROR_DEVICE_NOT_FOUND
+        self.mocklib.tdSensor = tdSensor
+        
+        core = TelldusCore()
+        sensors = core.sensors()
+        self.assertEqual(3, len(sensors))
 
 if __name__ == '__main__':
     unittest.main()
