@@ -150,15 +150,15 @@ class TelldusCore(object):
     def controllers(self):
         controllers = []
         try:
-            controller = self.lib.tdController()
-            controller['id_'] = controller['id']
-            controller['type_'] = controller['type']
-            del controller['id'], controller['type']
-            controllers.append(Controller(**controller))
+            while True:
+                controller = self.lib.tdController()
+                controller['id_'] = controller['id']
+                controller['type_'] = controller['type']
+                del controller['id'], controller['type']
+                controllers.append(Controller(**controller))
         except TelldusError as e:
-            if e.error == TELLSTICK_ERROR_NOT_FOUND:
-                pass
-            raise
+            if e.error != TELLSTICK_ERROR_NOT_FOUND:
+                raise
         return controllers
 
     def add_device(self, name, protocol, model=None, **parameters):
