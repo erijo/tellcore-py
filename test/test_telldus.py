@@ -94,19 +94,20 @@ class Test(unittest.TestCase):
     def test_sensors(self):
         self.sensor_index = 0
         def tdSensor(protocol, p_len, model, m_len, id_, datatypes):
-            sensors = [{'protocol': "proto_1", 'model': "model_1", 'id': 1,
+            sensors = [{'protocol': b"proto_1", 'model': b"model_1", 'id': 1,
                         'datatypes': TELLSTICK_TEMPERATURE},
-                       {'protocol': "proto_2", 'model': "model_2", 'id': 2,
+                       {'protocol': b"proto_2", 'model': b"model_2", 'id': 2,
                         'datatypes': TELLSTICK_TEMPERATURE},
-                       {'protocol': "proto_3", 'model': "model_3", 'id': 3,
+                       {'protocol': b"proto_3", 'model': b"model_3", 'id': 3,
                         'datatypes': TELLSTICK_HUMIDITY}]
             if self.sensor_index < len(sensors):
                 sensor = sensors[self.sensor_index]
                 self.sensor_index += 1
-                protocol = sensor['protocol']
-                model = sensor['model']
-                id_ = sensor['id']
-                datatypes = sensor['datatypes']
+
+                protocol.value = sensor['protocol']
+                model.value = sensor['model']
+                id_._obj.value = sensor['id']
+                datatypes._obj.value = sensor['datatypes']
                 return TELLSTICK_SUCCESS
             else:
                 self.sensor_index = 0
@@ -115,7 +116,16 @@ class Test(unittest.TestCase):
         
         core = TelldusCore()
         sensors = core.sensors()
+
         self.assertEqual(3, len(sensors))
+        self.assertEqual([b"proto_1", b"proto_2", b"proto_3"],
+                         [s.protocol for s in sensors])
+        self.assertEqual([b"model_1", b"model_2", b"model_3"],
+                         [s.model for s in sensors])
+        self.assertEqual([1, 2, 3], [s.id for s in sensors])
+        self.assertEqual([TELLSTICK_TEMPERATURE, TELLSTICK_TEMPERATURE,
+                          TELLSTICK_HUMIDITY],
+                         [s.datatypes for s in sensors])
 
 if __name__ == '__main__':
     unittest.main()
