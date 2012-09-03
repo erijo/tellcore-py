@@ -18,6 +18,7 @@
 try:
     import queue
 except ImportError:
+    # Fall back on old (python 2) variant
     import Queue as queue
 
 from .constants import *
@@ -217,15 +218,12 @@ class Device(object):
             raise AttributeError(name)
         return func(self.id, value)
 
-    def __str__(self):
-        desc = '/'.join([self.name, self.protocol, self.model])
-        return "device-%d [%s]" % (self.id, desc)
-
     def parameters(self):
         parameters = {}
+        default_value = "$%!)("
         for name in self.PARAMETERS:
-            value = self.get_parameter(name, "$%!")
-            if value != "$%!":
+            value = self.get_parameter(name, default_value)
+            if value != default_value:
                 parameters[name] = value
         return parameters
 
