@@ -280,8 +280,17 @@ class Sensor(object):
         self.lib = Library()
 
     def value(self, datatype):
-        return self.lib.tdSensorValue(self.protocol, self.model, self.id,
-                                      datatype)
+        value = self.lib.tdSensorValue(
+            self.protocol, self.model, self.id, datatype)
+        return SensorValue(value['value'], value['timestamp'])
+
+class SensorValue(object):
+    __slots__ = ["value", "timestamp"]
+
+    def __init__(self, value, timestamp):
+        object.__init__(self)
+        self.value = value
+        self.timestamp = timestamp
 
 class Controller(object):
     def __init__(self, id_, type_, name, available):
