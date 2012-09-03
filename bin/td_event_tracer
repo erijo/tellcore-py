@@ -85,20 +85,31 @@ parser.add_argument(
 parser.add_argument(
     '--controller', action='store_true', help='Trace controller events')
 
-args = parser.parse_args()
+args = vars(parser.parse_args())
 
 core = td.TelldusCore()
 callbacks = []
-if args.device or args.all:
-    callbacks.append(core.register_device_event(device_event))
-if args.change or args.all:
-    callbacks.append(core.register_device_change_event(device_change_event))
-if args.raw or args.all:
-    callbacks.append(core.register_raw_device_event(raw_event))
-if args.sensor or args.all:
-    callbacks.append(core.register_sensor_event(sensor_event))
-if args.controller or args.all:
-    callbacks.append(core.register_controller_event(controller_event))
+
+for arg in args:
+    if not (args[arg] or args['all']):
+        next
+    try:
+        if arg == 'device':
+            callbacks.append(core.register_device_event(device_event))
+        elif arg == 'change':
+            callbacks.append(
+                core.register_device_change_event(device_change_event))
+        elif arg == 'raw':
+            callbacks.append(core.register_raw_device_event(raw_event))
+        elif arg == 'sensor': 
+            callbacks.append(core.register_sensor_event(sensor_event))
+        elif arg == 'controller':
+            callbacks.append(core.register_controller_event(controller_event))
+        else:
+            assert arg == 'all'
+    except AttributeError:
+        if not args['all']:
+            raise
 
 if len(callbacks) == 0:
     print("Must enable at least one event")
