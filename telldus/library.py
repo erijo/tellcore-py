@@ -43,7 +43,7 @@ class TelldusError(Exception):
     """Error returned from Telldus API.
     """
     def __init__(self, error):
-        Exception.__init__(self)
+        super(TelldusError, self).__init__()
         self.error = error
 
     def __str__(self):
@@ -155,7 +155,7 @@ class Library(object):
         The library is only initialized the first time this object is
         created. Subsequent instances uses the same library instance.
         """
-        object.__init__(self)
+        super(Library, self).__init__()
 
         if Library._lib is None:
             assert Library._refcount == 0

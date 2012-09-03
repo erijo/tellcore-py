@@ -26,7 +26,7 @@ from .library import *
 
 class CallbackManager(object):
     def __init__(self):
-        object.__init__(self)
+        super(CallbackManager, self).__init__()
         self.lib = Library()
         self.callbacks = {}
         self.queue = queue.Queue()
@@ -88,7 +88,7 @@ class CallbackManager(object):
 
 class TelldusCore(object):
     def __init__(self, library_path=None, callback_manager=None):
-        object.__init__(self)
+        super(TelldusCore, self).__init__()
         self.callbacks = None
 
         if library_path is not None:
@@ -180,14 +180,15 @@ class TelldusCore(object):
     def disconnect_controller(self, vid, pid, serial):
         self.lib.tdDisconnectTellStickController(vid, pid, serial)
 
+
 class Device(object):
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
 
     def __init__(self, id_):
-        object.__init__(self)
-        object.__setattr__(self, 'id', id_)
-        object.__setattr__(self, 'lib', Library())
+        super(Device, self).__init__()
+        super(Device, self).__setattr__('id', id_)
+        super(Device, self).__setattr__('lib', Library())
 
     def remove(self):
         return self.lib.tdRemoveDevice(self.id)
@@ -270,9 +271,10 @@ class Device(object):
     def last_sent_value(self):
         return self.lib.tdLastSentValue(self.id)
 
+
 class Sensor(object):
     def __init__(self, protocol, model, id_, datatypes):
-        object.__init__(self)
+        super(Sensor, self).__init__()
         self.protocol = protocol
         self.model = model
         self.id = id_
@@ -296,22 +298,24 @@ class Sensor(object):
     def humidity(self):
         return self.value(TELLSTICK_HUMIDITY)
 
+
 class SensorValue(object):
     __slots__ = ["value", "timestamp"]
 
     def __init__(self, value, timestamp):
-        object.__init__(self)
+        super(SensorValue, self).__init__()
         self.value = value
         self.timestamp = timestamp
 
+
 class Controller(object):
     def __init__(self, id_, type_, name, available):
-        object.__init__(self)
-        object.__setattr__(self, 'id', id_)
-        object.__setattr__(self, 'type', type_)
-        object.__setattr__(self, 'name', name)
-        object.__setattr__(self, 'available', available)
-        object.__setattr__(self, 'lib', Library())
+        super(Controller, self).__init__()
+        super(Controller, self).__setattr__('id', id_)
+        super(Controller, self).__setattr__('type', type_)
+        super(Controller, self).__setattr__('name', name)
+        super(Controller, self).__setattr__('available', available)
+        super(Controller, self).__setattr__('lib', Library())
 
     def __getattr__(self, name):
         try:
