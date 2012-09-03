@@ -284,6 +284,18 @@ class Sensor(object):
             self.protocol, self.model, self.id, datatype)
         return SensorValue(value['value'], value['timestamp'])
 
+    def has_temperature(self):
+        return self.datatypes & TELLSTICK_TEMPERATURE != 0
+
+    def has_humidity(self):
+        return self.datatypes & TELLSTICK_HUMIDITY != 0
+
+    def temperature(self):
+        return self.value(TELLSTICK_TEMPERATURE)
+
+    def humidity(self):
+        return self.value(TELLSTICK_HUMIDITY)
+
 class SensorValue(object):
     __slots__ = ["value", "timestamp"]
 
