@@ -207,70 +207,70 @@ class Library(object):
 
     def tdRegisterDeviceEvent(self, callback):
         func = DEVICE_EVENT_FUNC(callback)
-        id_ = self._lib.tdRegisterDeviceEvent(func, None)
-        self._callbacks[id_] = func
-        return id_
+        id = self._lib.tdRegisterDeviceEvent(func, None)
+        self._callbacks[id] = func
+        return id
 
     def tdRegisterDeviceChangeEvent(self, callback):
         func = DEVICE_CHANGE_EVENT_FUNC(callback)
-        id_ = self._lib.tdRegisterDeviceChangeEvent(func, None)
-        self._callbacks[id_] = func
-        return id_
+        id = self._lib.tdRegisterDeviceChangeEvent(func, None)
+        self._callbacks[id] = func
+        return id
 
     def tdRegisterRawDeviceEvent(self, callback):
         func = RAW_DEVICE_EVENT_FUNC(callback)
-        id_ = self._lib.tdRegisterRawDeviceEvent(func, None)
-        self._callbacks[id_] = func
-        return id_
+        id = self._lib.tdRegisterRawDeviceEvent(func, None)
+        self._callbacks[id] = func
+        return id
 
     def tdRegisterSensorEvent(self, callback):
         func = SENSOR_EVENT_FUNC(callback)
-        id_ = self._lib.tdRegisterSensorEvent(func, None)
-        self._callbacks[id_] = func
-        return id_
+        id = self._lib.tdRegisterSensorEvent(func, None)
+        self._callbacks[id] = func
+        return id
 
     def tdRegisterControllerEvent(self, callback):
         func = CONTROLLER_EVENT_FUNC(callback)
-        id_ = self._lib.tdRegisterControllerEvent(func, None)
-        self._callbacks[id_] = func
-        return id_
+        id = self._lib.tdRegisterControllerEvent(func, None)
+        self._callbacks[id] = func
+        return id
 
-    def tdUnregisterCallback(self, id_):
-        del self._callbacks[id_]
-        self._lib.tdUnregisterCallback(id_)
+    def tdUnregisterCallback(self, id):
+        del self._callbacks[id]
+        self._lib.tdUnregisterCallback(id)
 
     def tdSensor(self):
         protocol = create_string_buffer(20)
         model = create_string_buffer(20)
-        id_ = c_int()
+        id = c_int()
         datatypes = c_int()
 
         self._lib.tdSensor(protocol, sizeof(protocol), model, sizeof(model),
-                           byref(id_), byref(datatypes))
+                           byref(id), byref(datatypes))
         return { 'protocol': protocol.value, 'model': model.value,
-                 'id': id_.value, 'datatypes': datatypes.value }
+                 'id': id.value, 'datatypes': datatypes.value }
 
-    def tdSensorValue(self, protocol, model, id_, datatype):
+    def tdSensorValue(self, protocol, model, id, datatype):
         value = create_string_buffer(20)
         timestamp = c_int()
 
-        self._lib.tdSensorValue(protocol, model, id_, datatype,
+        self._lib.tdSensorValue(protocol, model, id, datatype,
                                 value, sizeof(value), byref(timestamp))
         return { 'value': value.value, 'timestamp': timestamp.value }
 
     def tdController(self):
-        id_ = c_int()
-        type_ = c_int()
+        id = c_int()
+        type = c_int()
         name = create_string_buffer(255)
         available = c_int()
 
-        self._lib.tdController(byref(id_), byref(type_), name, sizeof(name),
+        self._lib.tdController(byref(id), byref(type), name, sizeof(name),
                                byref(available))
-        return { 'id': id_.value, 'type': type_.value,
+        return { 'id': id.value, 'type': type.value,
                  'name': name.value, 'available': available.value}
 
-    def tdControllerValue(self, id_, name):
+    def tdControllerValue(self, id, name):
         value = create_string_buffer(255)
 
-        self._lib.tdControllerValue(id_, name, value, sizeof(value))
+        self._lib.tdControllerValue(id, name, value, sizeof(value))
         return value.value

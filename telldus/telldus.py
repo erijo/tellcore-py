@@ -59,9 +59,9 @@ class CallbackManager(object):
             pass
 
     def _register(self, registrator, callback):
-        id_ = registrator(self._callback)
-        self.callbacks[id_] = callback
-        return id_
+        id = registrator(self._callback)
+        self.callbacks[id] = callback
+        return id
 
     def register_device_event(self, callback):
         return self._register(self.lib.tdRegisterDeviceEvent, callback)
@@ -78,13 +78,13 @@ class CallbackManager(object):
     def register_controller_event(self, callback):
         return self._register(self.lib.tdRegisterControllerEvent, callback)
 
-    def unregister(self, id_):
-        del self.callbacks[id_]
-        self.lib.tdUnregisterCallback(id_)
+    def unregister(self, id):
+        del self.callbacks[id]
+        self.lib.tdUnregisterCallback(id)
 
     def unregister_all(self):
-        for id_ in list(self.callbacks.keys()):
-            self.unregister(id_)
+        for id in list(self.callbacks.keys()):
+            self.unregister(id)
 
 
 class TelldusCore(object):
@@ -121,8 +121,8 @@ class TelldusCore(object):
     def register_controller_event(self, callback):
         return self.callbacks.register_controller_event(callback)
 
-    def unregister_callback(self, id_):
-        return self.callbacks.unregister(id_)
+    def unregister_callback(self, id):
+        return self.callbacks.unregister(id)
 
     def process_pending_callbacks(self):
         self.callbacks.process_pending()
@@ -131,8 +131,8 @@ class TelldusCore(object):
         devices = []
         count = self.lib.tdGetNumberOfDevices()
         for i in range(0, count):
-            id_ = self.lib.tdGetDeviceId(i)
-            devices.append(Device(id_))
+            id = self.lib.tdGetDeviceId(i)
+            devices.append(Device(id))
         return devices
 
     def sensors(self):
@@ -140,8 +140,6 @@ class TelldusCore(object):
         try:
             while True:
                 sensor = self.lib.tdSensor()
-                sensor['id_'] = sensor['id']
-                del sensor['id']
                 sensors.append(Sensor(**sensor))
         except TelldusError as e:
             if e.error != TELLSTICK_ERROR_DEVICE_NOT_FOUND:
@@ -153,9 +151,6 @@ class TelldusCore(object):
         try:
             while True:
                 controller = self.lib.tdController()
-                controller['id_'] = controller['id']
-                controller['type_'] = controller['type']
-                del controller['id'], controller['type']
                 controllers.append(Controller(**controller))
         except TelldusError as e:
             if e.error != TELLSTICK_ERROR_NOT_FOUND:
@@ -186,9 +181,9 @@ class Device(object):
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
 
-    def __init__(self, id_):
+    def __init__(self, id):
         super(Device, self).__init__()
-        super(Device, self).__setattr__('id', id_)
+        super(Device, self).__setattr__('id', id)
         super(Device, self).__setattr__('lib', Library())
 
     def remove(self):
@@ -271,11 +266,11 @@ class Device(object):
 
 
 class Sensor(object):
-    def __init__(self, protocol, model, id_, datatypes):
+    def __init__(self, protocol, model, id, datatypes):
         super(Sensor, self).__init__()
         self.protocol = protocol
         self.model = model
-        self.id = id_
+        self.id = id
         self.datatypes = datatypes
         self.lib = Library()
 
@@ -307,10 +302,10 @@ class SensorValue(object):
 
 
 class Controller(object):
-    def __init__(self, id_, type_, name, available):
+    def __init__(self, id, type, name, available):
         super(Controller, self).__init__()
-        super(Controller, self).__setattr__('id', id_)
-        super(Controller, self).__setattr__('type', type_)
+        super(Controller, self).__setattr__('id', id)
+        super(Controller, self).__setattr__('type', type)
         super(Controller, self).__setattr__('name', name)
         super(Controller, self).__setattr__('available', available)
         super(Controller, self).__setattr__('lib', Library())
