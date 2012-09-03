@@ -12,5 +12,4 @@ TODO
 ----
 
 * Extended the unit test for TelldusCore and friends.
-* Test it with a real TellStick.
 * Improve documentation.
