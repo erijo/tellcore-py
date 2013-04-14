@@ -233,7 +233,7 @@ class Device(object):
         return self.lib.tdGetDeviceParameter(self.id, name, default_value)
 
     def set_parameter(self, name, value):
-        return self.lib.tdSetDeviceParameter(self.id, name, value)
+        return self.lib.tdSetDeviceParameter(self.id, name, str(value))
 
     def turn_on(self):
         self.lib.tdTurnOn(self.id)
