@@ -222,15 +222,19 @@ class Device(object):
 
     def parameters(self):
         parameters = {}
-        default_value = "$%!)("
         for name in self.PARAMETERS:
-            value = self.get_parameter(name, default_value)
-            if value != default_value:
-                parameters[name] = value
+            try:
+                parameters[name] = self.get_parameter(name)
+            except AttributeError:
+                pass
         return parameters
 
-    def get_parameter(self, name, default_value):
-        return self.lib.tdGetDeviceParameter(self.id, name, default_value)
+    def get_parameter(self, name):
+        default_value = "$%!)(INVALID)(!%$"
+        value = self.lib.tdGetDeviceParameter(self.id, name, default_value)
+        if value == default_value:
+            raise AttributeError(name)
+        return value
 
     def set_parameter(self, name, value):
         return self.lib.tdSetDeviceParameter(self.id, name, str(value))
