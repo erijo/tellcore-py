@@ -159,13 +159,20 @@ class TelldusCore(object):
 
     def add_device(self, name, protocol, model=None, **parameters):
         device = Device(self.lib.tdAddDevice())
-        device.name = name
-        device.protocol = protocol
-        if model is not None:
-            device.model = model
-        for key, value in parameters.items():
-            device.set_parameter(key, value)
-        return device
+        try:
+            device.name = name
+            device.protocol = protocol
+            if model is not None:
+                device.model = model
+                for key, value in parameters.items():
+                    device.set_parameter(key, value)
+            return device
+        except Exception as e:
+            try:
+                device.remove()
+            except:
+                pass
+            raise e
 
     def send_raw_command(self, command, reserved=0):
         return self.lib.tdSendRawCommand(command, reserved)
