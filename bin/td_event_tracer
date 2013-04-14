@@ -92,7 +92,7 @@ callbacks = []
 
 for arg in args:
     if not (args[arg] or args['all']):
-        next
+        continue
     try:
         if arg == 'device':
             callbacks.append(core.register_device_event(device_event))
