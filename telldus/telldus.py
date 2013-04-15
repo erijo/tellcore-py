@@ -164,8 +164,8 @@ class TelldusCore(object):
             device.protocol = protocol
             if model is not None:
                 device.model = model
-                for key, value in parameters.items():
-                    device.set_parameter(key, value)
+            for key, value in parameters.items():
+                device.set_parameter(key, value)
             return device
         except Exception as e:
             try:
