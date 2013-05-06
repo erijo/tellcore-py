@@ -17,12 +17,12 @@
 
 import unittest
 
-import telldus.telldus
+from telldus.telldus import TelldusCore, TelldusError, Device
 from telldus.constants import *
+import telldus.library
 
 import mocklib
 
-TelldusCore = telldus.telldus.TelldusCore
 telldus.library.string_at = lambda x: x
 
 
@@ -109,6 +109,26 @@ class Test(unittest.TestCase):
                          [d.protocol for d in devices])
         self.assertEqual([b'model_1', b'model_2', b'model_3'],
                          [d.model for d in devices])
+
+    def test_device(self):
+        def actor(id):
+            if id == 3:
+                return TELLSTICK_SUCCESS
+            else:
+                return TELLSTICK_ERROR_DEVICE_NOT_FOUND
+        self.mocklib.tdTurnOn = actor
+        self.mocklib.tdTurnOff = actor
+        self.mocklib.tdBell = lambda id: TELLSTICK_ERROR_METHOD_NOT_SUPPORTED
+
+        device = Device(3)
+        device.turn_on()
+        device.turn_off()
+        self.assertRaises(TelldusError, device.bell)
+
+        device = Device(4)
+        self.assertRaises(TelldusError, device.turn_on)
+        self.assertRaises(TelldusError, device.turn_off)
+        self.assertRaises(TelldusError, device.bell)
 
     def test_sensors(self):
         self.sensor_index = 0
