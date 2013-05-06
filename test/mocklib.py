@@ -76,6 +76,10 @@ class MockCFunction(object):
         # Verify that the arguments are of correct type
         for c_type, value in zip(self.argtypes, args):
             if type(value) is not c_type:
+                # Functions returning char pointers are set up to return an
+                # unsigned long instead. Reset it here to make the check work.
+                if c_type is ctypes.c_ulong:
+                    c_type = ctypes.c_char_p
                 # The 'raw' attribute is the pointer for string buffers
                 if hasattr(value, 'raw'):
                     c_value = c_type(value.raw)

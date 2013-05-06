@@ -130,7 +130,7 @@ class TelldusCore(object):
     def devices(self):
         devices = []
         count = self.lib.tdGetNumberOfDevices()
-        for i in range(0, count):
+        for i in range(count):
             id = self.lib.tdGetDeviceId(i)
             devices.append(Device(id))
         return devices

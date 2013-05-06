@@ -91,6 +91,25 @@ class Test(unittest.TestCase):
                           self.mockdispatcher.trigger_controller_event,
                           (10, 11, 12, b"new"))
 
+    def test_devices(self):
+        devs = {0: {'protocol': b"proto_1", 'model': b"model_1"},
+                3: {'protocol': b"proto_2", 'model': b"model_2"},
+                6: {'protocol': b"proto_3", 'model': b"model_3"}}
+
+        self.mocklib.tdGetNumberOfDevices = lambda: len(devs)
+        self.mocklib.tdGetDeviceId = lambda index: index * 3
+        self.mocklib.tdGetProtocol = lambda id: devs[id]['protocol']
+        self.mocklib.tdGetModel = lambda id: devs[id]['model']
+
+        core = TelldusCore()
+        devices = core.devices()
+
+        self.assertEqual(3, len(devices))
+        self.assertEqual([b'proto_1', b'proto_2', b'proto_3'],
+                         [d.protocol for d in devices])
+        self.assertEqual([b'model_1', b'model_2', b'model_3'],
+                         [d.model for d in devices])
+
     def test_sensors(self):
         self.sensor_index = 0
         def tdSensor(protocol, p_len, model, m_len, id_, datatypes):
