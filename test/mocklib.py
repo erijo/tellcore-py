@@ -38,6 +38,14 @@ class MockLibLoader(object):
         return self.mocklib
 
 class MockTelldusCoreLib(object):
+    def __init__(self):
+        object.__init__(self)
+
+        self.tdInit = lambda: None
+        self.tdClose = lambda: None
+
+        self.tdReleaseString = lambda x: None
+
     def __getattr__(self, name):
         if name in telldus.library.Library._functions:
             func = MockCFunction(name, self)
@@ -76,10 +84,6 @@ class MockCFunction(object):
         # Verify that the arguments are of correct type
         for c_type, value in zip(self.argtypes, args):
             if type(value) is not c_type:
-                # Functions returning char pointers are set up to return an
-                # unsigned long instead. Reset it here to make the check work.
-                if c_type is ctypes.c_ulong:
-                    c_type = ctypes.c_char_p
                 # The 'raw' attribute is the pointer for string buffers
                 if hasattr(value, 'raw'):
                     c_value = c_type(value.raw)
@@ -87,6 +91,14 @@ class MockCFunction(object):
                     c_value = c_type(value)
 
         res = self.implementation(*args)
+
+        # Functions returning char pointers are set up to return the pointer as
+        # a void pointer. Do the conversion here to match the real thing.
+        if self.restype is ctypes.c_void_p:
+            res = ctypes.cast(res, ctypes.c_void_p)
+        # For the rest, verify that the return value is of correct type.
+        elif self.restype is not None:
+            c_value = self.restype(res)
 
         if self.errcheck is not None:
             res = self.errcheck(res, self, args)

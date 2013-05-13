@@ -16,7 +16,7 @@
 # USA
 
 from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong, c_void_p
-from ctypes import byref, create_string_buffer, POINTER, sizeof, string_at
+from ctypes import byref, cast, create_string_buffer, POINTER, sizeof
 import platform
 
 
@@ -52,6 +52,8 @@ class TelldusError(Exception):
 
 
 class Library(object):
+    STRING_ENCODING = 'ascii'
+
     _lib = None
     _refcount = 0
     _callbacks = {}
@@ -59,7 +61,7 @@ class Library(object):
     _functions = {
         'tdInit': [None, []],
         'tdClose': [None, []],
-        'tdReleaseString': [None, [c_ulong]],
+        'tdReleaseString': [None, [c_void_p]],
         'tdGetErrorString': [c_char_p, [c_int]],
 
         'tdRegisterDeviceEvent':
@@ -119,7 +121,10 @@ class Library(object):
         'tdControllerValue': [c_int, [c_int, c_char_p, c_char_p, c_int]],
         'tdSetControllerValue': [c_int, [c_int, c_char_p, c_char_p]],
         'tdRemoveController': [c_int, [c_int]],
-   }
+    }
+
+    def _to_str(self, char_p):
+        return char_p.value.decode(Library.STRING_ENCODING)
 
     def _setup_functions(self, lib):
         def check_result(result, func, args):
@@ -129,9 +134,9 @@ class Library(object):
 
         def free_string(result, func, args):
             if result != 0:
-                string = string_at(result)
+                string = cast(result, c_char_p).value
                 lib.tdReleaseString(result)
-                return string
+                return string.decode(Library.STRING_ENCODING)
             return None
 
         for name, signature in self._functions.items():
@@ -143,7 +148,7 @@ class Library(object):
                 if func.restype == c_int:
                     func.errcheck = check_result
                 elif func.restype == c_char_p:
-                    func.restype = c_ulong
+                    func.restype = c_void_p
                     func.errcheck = free_string
             except AttributeError:
                 # Older version of the lib don't have all the functions
@@ -247,8 +252,9 @@ class Library(object):
 
         self._lib.tdSensor(protocol, sizeof(protocol), model, sizeof(model),
                            byref(id), byref(datatypes))
-        return { 'protocol': protocol.value, 'model': model.value,
-                 'id': id.value, 'datatypes': datatypes.value }
+        return {'protocol': self._to_str(protocol),
+                'model': self._to_str(model),
+                'id': id.value, 'datatypes': datatypes.value}
 
     def tdSensorValue(self, protocol, model, id, datatype):
         value = create_string_buffer(20)
@@ -256,7 +262,7 @@ class Library(object):
 
         self._lib.tdSensorValue(protocol, model, id, datatype,
                                 value, sizeof(value), byref(timestamp))
-        return { 'value': value.value, 'timestamp': timestamp.value }
+        return {'value': self._to_str(value), 'timestamp': timestamp.value}
 
     def tdController(self):
         id = c_int()
@@ -266,11 +272,11 @@ class Library(object):
 
         self._lib.tdController(byref(id), byref(type), name, sizeof(name),
                                byref(available))
-        return { 'id': id.value, 'type': type.value,
-                 'name': name.value, 'available': available.value}
+        return {'id': id.value, 'type': type.value,
+                'name': self._to_str(name), 'available': available.value}
 
     def tdControllerValue(self, id, name):
         value = create_string_buffer(255)
 
         self._lib.tdControllerValue(id, name, value, sizeof(value))
-        return value.value
+        return self._to_str(value)

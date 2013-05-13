@@ -20,11 +20,11 @@ import unittest
 import telldus.library
 from telldus.constants import *
 
+import ctypes
 import mocklib
 
 Library = telldus.library.Library
 TelldusError = telldus.library.TelldusError
-telldus.library.string_at = lambda x: x
 
 
 class Test(unittest.TestCase):
@@ -43,9 +43,6 @@ class Test(unittest.TestCase):
                 raise RuntimeError("not initialized")
             self.initialized = False
         self.mocklib.tdClose = tdClose
-
-        self.mocklib.tdGetErrorString = lambda x: x
-        self.mocklib.tdReleaseString = lambda x: None
 
         self.loader = mocklib.MockLibLoader(self.mocklib)
         telldus.library.DllLoader = self.loader
@@ -88,17 +85,21 @@ class Test(unittest.TestCase):
         """Test that all strings returned from core lib are released"""
         released = []
         def tdReleaseString(pointer):
-            released.append(pointer)
+            released.append(pointer.value)
         self.mocklib.tdReleaseString = tdReleaseString
 
+        returned = []
         def tdGetErrorString(error):
-            return 0xdeadbeaf + error
+            string = ctypes.c_char_p(
+                ("error %d" % error).encode(Library.STRING_ENCODING))
+            void_pointer = ctypes.cast(string, ctypes.c_void_p)
+            returned.append(void_pointer.value)
+            return string
         self.mocklib.tdGetErrorString = tdGetErrorString
 
         lib = Library()
-        returned = []
         for i in range(-5, 0):
-            returned.append(lib.tdGetErrorString(i))
+            lib.tdGetErrorString(i)
 
         self.assertEqual(len(released), 5)
         self.assertEqual(returned, released)

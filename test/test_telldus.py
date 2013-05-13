@@ -21,21 +21,14 @@ from telldus.telldus import TelldusCore, TelldusError, Device
 from telldus.constants import *
 import telldus.library
 
+from ctypes import c_char_p, c_int, create_string_buffer
 import mocklib
-
-telldus.library.string_at = lambda x: x
 
 
 class Test(unittest.TestCase):
     def setUp(self):
         self.mocklib = mocklib.MockTelldusCoreLib()
         self.mockdispatcher = mocklib.MockEventDispatcher()
-
-        self.mocklib.tdInit = lambda: None
-        self.mocklib.tdClose = lambda: None
-        self.mocklib.tdGetErrorString = lambda x: x
-        self.mocklib.tdReleaseString = lambda x: None
-
         self.mockdispatcher.setup_lib_functions(self.mocklib)
 
         self.loader = mocklib.MockLibLoader(self.mocklib)
@@ -59,37 +52,40 @@ class Test(unittest.TestCase):
         trigger(*trigger_args)
         core.process_pending_callbacks()
 
-        self.assertEqual(event_args, { id1: trigger_args, id3: trigger_args })
+        callback_args = tuple([a.value for a in trigger_args])
+
+        self.assertEqual(event_args, {id1: callback_args, id3: callback_args})
 
     def test_device_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_device_event,
                           self.mockdispatcher.trigger_device_event,
-                          (1, 2, b"foo"))
+                          (c_int(1), c_int(2), c_char_p(b"foo")))
 
     def test_device_change_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_device_change_event,
                           self.mockdispatcher.trigger_device_change_event,
-                          (3, 4, 5))
+                          (c_int(3), c_int(4), c_int(5)))
 
     def test_raw_device_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_raw_device_event,
                           self.mockdispatcher.trigger_raw_device_event,
-                          (b"bar", 6))
+                          (c_char_p(b"bar"), c_int(6)))
         
     def test_sensor_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_sensor_event,
                           self.mockdispatcher.trigger_sensor_event,
-                          (b"proto", b"model", 7, 8, b"value", 9))
+                          (c_char_p(b"proto"), c_char_p(b"model"), c_int(7),
+                           c_int(8), c_char_p(b"value"), c_int(9)))
 
     def test_controller_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_controller_event,
                           self.mockdispatcher.trigger_controller_event,
-                          (10, 11, 12, b"new"))
+                          (c_int(10), c_int(11), c_int(12), c_char_p(b"new")))
 
     def test_devices(self):
         devs = {0: {'protocol': b"proto_1", 'model': b"model_1"},
@@ -98,16 +94,18 @@ class Test(unittest.TestCase):
 
         self.mocklib.tdGetNumberOfDevices = lambda: len(devs)
         self.mocklib.tdGetDeviceId = lambda index: index * 3
-        self.mocklib.tdGetProtocol = lambda id: devs[id]['protocol']
-        self.mocklib.tdGetModel = lambda id: devs[id]['model']
+        self.mocklib.tdGetProtocol = lambda id: \
+            c_char_p(devs[id]['protocol'])
+        self.mocklib.tdGetModel = lambda id: \
+            c_char_p(devs[id]['model'])
 
         core = TelldusCore()
         devices = core.devices()
 
         self.assertEqual(3, len(devices))
-        self.assertEqual([b'proto_1', b'proto_2', b'proto_3'],
+        self.assertEqual(['proto_1', 'proto_2', 'proto_3'],
                          [d.protocol for d in devices])
-        self.assertEqual([b'model_1', b'model_2', b'model_3'],
+        self.assertEqual(['model_1', 'model_2', 'model_3'],
                          [d.model for d in devices])
 
     def test_device(self):
@@ -132,7 +130,7 @@ class Test(unittest.TestCase):
 
     def test_sensors(self):
         self.sensor_index = 0
-        def tdSensor(protocol, p_len, model, m_len, id_, datatypes):
+        def tdSensor(protocol, p_len, model, m_len, id, datatypes):
             sensors = [{'protocol': b"proto_1", 'model': b"model_1", 'id': 1,
                         'datatypes': TELLSTICK_TEMPERATURE},
                        {'protocol': b"proto_2", 'model': b"model_2", 'id': 2,
@@ -145,7 +143,7 @@ class Test(unittest.TestCase):
 
                 protocol.value = sensor['protocol']
                 model.value = sensor['model']
-                id_._obj.value = sensor['id']
+                id._obj.value = sensor['id']
                 datatypes._obj.value = sensor['datatypes']
                 return TELLSTICK_SUCCESS
             else:
@@ -157,9 +155,9 @@ class Test(unittest.TestCase):
         sensors = core.sensors()
 
         self.assertEqual(3, len(sensors))
-        self.assertEqual([b"proto_1", b"proto_2", b"proto_3"],
+        self.assertEqual(["proto_1", "proto_2", "proto_3"],
                          [s.protocol for s in sensors])
-        self.assertEqual([b"model_1", b"model_2", b"model_3"],
+        self.assertEqual(["model_1", "model_2", "model_3"],
                          [s.model for s in sensors])
         self.assertEqual([1, 2, 3], [s.id for s in sensors])
         self.assertEqual([TELLSTICK_TEMPERATURE, TELLSTICK_TEMPERATURE,
