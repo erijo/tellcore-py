@@ -54,6 +54,12 @@ class TelldusError(Exception):
 class Library(object):
     STRING_ENCODING = 'ascii'
 
+    class c_string_p(c_char_p):
+        def __init__(self, string):
+            if type(string) is str:
+                string = string.encode(Library.STRING_ENCODING)
+            c_char_p.__init__(self, string)
+
     _lib = None
     _refcount = 0
     _callbacks = {}
@@ -94,32 +100,32 @@ class Library(object):
         'tdGetDeviceType': [c_int, [c_int]],
 
         'tdGetName': [c_char_p, [c_int]],
-        'tdSetName': [c_bool, [c_int, c_char_p]],
+        'tdSetName': [c_bool, [c_int, c_string_p]],
         'tdGetProtocol': [c_char_p, [c_int]],
-        'tdSetProtocol': [c_bool, [c_int, c_char_p]],
+        'tdSetProtocol': [c_bool, [c_int, c_string_p]],
         'tdGetModel': [c_char_p, [c_int]],
-        'tdSetModel': [c_bool, [c_int, c_char_p]],
+        'tdSetModel': [c_bool, [c_int, c_string_p]],
 
-        'tdGetDeviceParameter': [c_char_p, [c_int, c_char_p, c_char_p]],
-        'tdSetDeviceParameter': [c_bool, [c_int, c_char_p, c_char_p]],
+        'tdGetDeviceParameter': [c_char_p, [c_int, c_string_p, c_string_p]],
+        'tdSetDeviceParameter': [c_bool, [c_int, c_string_p, c_string_p]],
 
         'tdAddDevice': [c_int, []],
         'tdRemoveDevice': [c_bool, [c_int]],
 
-        'tdSendRawCommand': [c_int, [c_char_p, c_int]],
+        'tdSendRawCommand': [c_int, [c_string_p, c_int]],
 
-        'tdConnectTellStickController': [None, [c_int, c_int, c_char_p]],
-        'tdDisconnectTellStickController': [None, [c_int, c_int, c_char_p]],
+        'tdConnectTellStickController': [None, [c_int, c_int, c_string_p]],
+        'tdDisconnectTellStickController': [None, [c_int, c_int, c_string_p]],
 
         'tdSensor': [c_int, [c_char_p, c_int, c_char_p, c_int,
                              POINTER(c_int), POINTER(c_int)]],
-        'tdSensorValue': [c_int, [c_char_p, c_char_p, c_int, c_int,
+        'tdSensorValue': [c_int, [c_string_p, c_string_p, c_int, c_int,
                                   c_char_p, c_int, POINTER(c_int)]],
 
         'tdController': [c_int, [POINTER(c_int), POINTER(c_int),
                                  c_char_p, c_int, POINTER(c_int)]],
-        'tdControllerValue': [c_int, [c_int, c_char_p, c_char_p, c_int]],
-        'tdSetControllerValue': [c_int, [c_int, c_char_p, c_char_p]],
+        'tdControllerValue': [c_int, [c_int, c_string_p, c_char_p, c_int]],
+        'tdSetControllerValue': [c_int, [c_int, c_string_p, c_string_p]],
         'tdRemoveController': [c_int, [c_int]],
     }
 
@@ -133,11 +139,11 @@ class Library(object):
             return result
 
         def free_string(result, func, args):
-            if result != 0:
-                string = cast(result, c_char_p).value
+            string = cast(result, c_char_p).value
+            if string is not None:
                 lib.tdReleaseString(result)
-                return string.decode(Library.STRING_ENCODING)
-            return None
+                string = string.decode(Library.STRING_ENCODING)
+            return string
 
         for name, signature in self._functions.items():
             try:

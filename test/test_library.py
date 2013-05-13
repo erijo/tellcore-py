@@ -104,6 +104,44 @@ class Test(unittest.TestCase):
         self.assertEqual(len(released), 5)
         self.assertEqual(returned, released)
 
+    def test_string_parameter(self):
+        def int_strings(ignore, string1, string2="defaultValue"):
+            self.assertEqual(string1, b"aString")
+            if string2 != "defaultValue":
+                self.assertEqual(string2, b"aSecondString")
+            return 0
+
+        string_int = lambda s, i: int_strings(i, s)
+        ints_string = lambda i1, i2, s: int_strings(i1, s)
+        strings_ignore = lambda s1, s2, *args: int_strings(0, s1, s2)
+        int_string_ignore = lambda i, s, *args: int_strings(i, s)
+
+        self.mocklib.tdSetName = int_strings
+        self.mocklib.tdSetProtocol = int_strings
+        self.mocklib.tdSetModel = int_strings
+        self.mocklib.tdSetDeviceParameter = int_strings
+        self.mocklib.tdGetDeviceParameter = int_strings
+        self.mocklib.tdSendRawCommand = string_int
+        self.mocklib.tdConnectTellStickController = ints_string
+        self.mocklib.tdDisconnectTellStickController = ints_string
+        self.mocklib.tdSensorValue = strings_ignore
+        self.mocklib.tdControllerValue = int_string_ignore
+        self.mocklib.tdSetControllerValue = int_strings
+
+        lib = Library()
+
+        lib.tdSetName(1, "aString")
+        lib.tdSetProtocol(1, "aString")
+        lib.tdSetModel(1, "aString")
+        lib.tdSetDeviceParameter(1, "aString", "aSecondString")
+        lib.tdGetDeviceParameter(1, "aString", "aSecondString")
+        lib.tdSendRawCommand("aString", 1)
+        lib.tdConnectTellStickController(0, 0, "aString")
+        lib.tdDisconnectTellStickController(0, 0, "aString")
+        lib.tdSensorValue("aString", "aSecondString", 0, 0)
+        lib.tdControllerValue(1, "aString")
+        lib.tdSetControllerValue(1, "aString", "aSecondString")
+
     def setup_callback(self, registered_ids, unregistered_ids):
         def tdRegisterEvent(*args):
             id_ = len(registered_ids) + 1

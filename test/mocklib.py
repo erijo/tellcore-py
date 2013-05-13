@@ -81,16 +81,21 @@ class MockCFunction(object):
             raise TypeError("%s() takes exactly %d argument(s) (%d given)" %
                             (self.name, len(self.argument), len(args)))
 
+        c_args = []
+
         # Verify that the arguments are of correct type
         for c_type, value in zip(self.argtypes, args):
+            c_args.append(value)
             if type(value) is not c_type:
                 # The 'raw' attribute is the pointer for string buffers
                 if hasattr(value, 'raw'):
                     c_value = c_type(value.raw)
                 elif type(value) is not ByRefArgType:
                     c_value = c_type(value)
+                    # Pass the possibly converted value instead of the original
+                    c_args[-1] = c_value.value
 
-        res = self.implementation(*args)
+        res = self.implementation(*c_args)
 
         # Functions returning char pointers are set up to return the pointer as
         # a void pointer. Do the conversion here to match the real thing.
