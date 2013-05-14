@@ -35,7 +35,14 @@ class CallbackManager(object):
     def __del__(self):
         assert len(self.callbacks) == 0
 
-    def _callback(self, *args):
+    def _callback(self, *in_args):
+        args = []
+        # Convert all char* parameters (i.e. bytes) to proper python strings
+        for arg in in_args:
+            if type(arg) is bytes:
+                args.append(arg.decode(Library.STRING_ENCODING))
+            else:
+                args.append(arg)
         self.queue.put(args)
 
     def process(self, **kwargs):

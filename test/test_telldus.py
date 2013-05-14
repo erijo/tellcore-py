@@ -52,7 +52,14 @@ class Test(unittest.TestCase):
         trigger(*trigger_args)
         core.process_pending_callbacks()
 
-        callback_args = tuple([a.value for a in trigger_args])
+        callback_args = []
+        for arg in trigger_args:
+            if type(arg.value) is bytes:
+                callback_args.append(arg.value.decode(
+                        telldus.library.Library.STRING_ENCODING))
+            else:
+                callback_args.append(arg.value)
+        callback_args = tuple(callback_args)
 
         self.assertEqual(event_args, {id1: callback_args, id3: callback_args})
 
