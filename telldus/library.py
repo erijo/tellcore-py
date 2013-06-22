@@ -52,11 +52,11 @@ class TelldusError(Exception):
 
 
 class Library(object):
-    STRING_ENCODING = 'ascii'
+    STRING_ENCODING = 'utf-8'
 
     class c_string_p(c_char_p):
         def __init__(self, string):
-            if type(string) is str:
+            if type(string) is str or type(string) is unicode:
                 string = string.encode(Library.STRING_ENCODING)
             c_char_p.__init__(self, string)
 
