@@ -144,7 +144,8 @@ class Test(unittest.TestCase):
 
     def test_unicode(self):
         def tdSetName(id, name):
-            self.assertEqual(name, u"\xe5\xe4\xf6".encode("utf-8"))
+            self.assertEqual(name, u"\xe5\xe4\xf6".encode(
+                    Library.STRING_ENCODING))
         self.mocklib.tdSetName = tdSetName
 
         lib = Library()
