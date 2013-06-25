@@ -23,7 +23,7 @@ except ImportError:
 import ctypes
 import threading
 
-import telldus.library
+import tellcore.library
 
 ByRefArgType = type(ctypes.byref(ctypes.c_int(0)))
 
@@ -47,14 +47,14 @@ class MockTelldusCoreLib(object):
         self.tdReleaseString = lambda x: None
 
     def __getattr__(self, name):
-        if name in telldus.library.Library._functions:
+        if name in tellcore.library.Library._functions:
             func = MockCFunction(name, self)
             object.__setattr__(self, name, func)
             return func
         raise AttributeError(name)
 
     def __setattr__(self, name, value):
-        if name in telldus.library.Library._functions:
+        if name in tellcore.library.Library._functions:
             func = getattr(self, name)
             func.implementation = value
         else:

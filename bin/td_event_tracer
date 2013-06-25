@@ -3,8 +3,8 @@
 import argparse
 import sys
 
-import telldus.telldus as td
-from telldus.constants import *
+import tellcore.telldus as td
+from tellcore.constants import *
 
 METHODS = {TELLSTICK_TURNON: 'turn on',
            TELLSTICK_TURNOFF: 'turn off',

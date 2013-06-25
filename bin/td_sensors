@@ -2,7 +2,7 @@
 
 import time
 
-import telldus.telldus as td
+import tellcore.telldus as td
 
 core = td.TelldusCore()
 sensors = core.sensors()

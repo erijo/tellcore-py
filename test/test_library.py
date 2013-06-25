@@ -17,14 +17,14 @@
 
 import unittest
 
-import telldus.library
-from telldus.constants import *
+import tellcore.library
+from tellcore.constants import *
 
 import ctypes
 import mocklib
 
-Library = telldus.library.Library
-TelldusError = telldus.library.TelldusError
+Library = tellcore.library.Library
+TelldusError = tellcore.library.TelldusError
 
 
 class Test(unittest.TestCase):
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
         self.mocklib.tdClose = tdClose
 
         self.loader = mocklib.MockLibLoader(self.mocklib)
-        telldus.library.DllLoader = self.loader
+        tellcore.library.DllLoader = self.loader
 
     def test_libloader(self):
         self.assertEqual(self.loader.load_count, 0)

@@ -17,9 +17,9 @@
 
 import unittest
 
-from telldus.telldus import TelldusCore, TelldusError, Device
-from telldus.constants import *
-import telldus.library
+from tellcore.telldus import TelldusCore, TelldusError, Device
+from tellcore.constants import *
+import tellcore.library
 
 from ctypes import c_char_p, c_int, create_string_buffer
 import mocklib
@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         self.mockdispatcher.setup_lib_functions(self.mocklib)
 
         self.loader = mocklib.MockLibLoader(self.mocklib)
-        telldus.library.DllLoader = self.loader
+        tellcore.library.DllLoader = self.loader
 
     def tearDown(self):
         self.mockdispatcher.stop()
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         for arg in trigger_args:
             if type(arg.value) is bytes:
                 callback_args.append(arg.value.decode(
-                        telldus.library.Library.STRING_ENCODING))
+                        tellcore.library.Library.STRING_ENCODING))
             else:
                 callback_args.append(arg.value)
         callback_args = tuple(callback_args)
