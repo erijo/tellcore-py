@@ -8,7 +8,7 @@ setup(
     author='Erik Johansson',
     author_email='erik@ejohansson.se',
     packages=['tellcore'],
-    url='https://github.com/erijo/telldus-py',
+    url='https://github.com/erijo/tellcore-py',
     license='GPLv3',
     description='Python wrapper for Telldus Core',
     long_description=open('README.rst').read(),

@@ -8,6 +8,9 @@ The module consists of a number of separate classes to make the library easier
 and more python-ish to work with. See the `internals`_ section below for more
 details.
 
+* Official home page: https://github.com/erijo/tellcore-py
+* Python package index: https://pypi.python.org/pypi/tellcore-py
+
 Features
 --------
 
