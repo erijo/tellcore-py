@@ -9,5 +9,5 @@ setup(
     url='https://github.com/erijo/telldus-py',
     license='LICENSE.txt',
     description='Python wrapper for Telldus Core',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
 )
