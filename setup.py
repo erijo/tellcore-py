@@ -7,7 +7,16 @@ setup(
     author_email='erik@ejohansson.se',
     packages=['tellcore'],
     url='https://github.com/erijo/telldus-py',
-    license='LICENSE.txt',
+    license='GPLv3',
     description='Python wrapper for Telldus Core',
     long_description=open('README.rst').read(),
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+        'Topic :: Home Automation',
+        ],
 )
