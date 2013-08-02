@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import time
 
 import tellcore.telldus as td
 from tellcore.constants import *
@@ -118,6 +119,7 @@ if len(callbacks) == 0:
 
 try:
     while True:
-        core.callbacks.process(timeout=1)
+        core.process_pending_callbacks()
+        time.sleep(0.5)
 except KeyboardInterrupt:
     pass
