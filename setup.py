@@ -10,7 +10,7 @@ setup(
     packages=['tellcore'],
     url='https://github.com/erijo/tellcore-py',
     license='GPLv3',
-    description='Python wrapper for Telldus Core',
+    description='Python wrapper for Telldus\' home automation library',
     long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
