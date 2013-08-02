@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Erik Johansson <erik@ejohansson.se>
+# Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -25,114 +25,73 @@ from .constants import *
 from .library import *
 
 
-class CallbackManager(object):
+class QueuedCallbackDispatcher(BaseCallbackDispatcher):
     def __init__(self):
-        super(CallbackManager, self).__init__()
-        self.lib = Library()
-        self.callbacks = {}
-        self.queue = queue.Queue()
+        super(QueuedCallbackDispatcher, self).__init__()
+        self._queue = queue.Queue()
 
-    def __del__(self):
-        assert len(self.callbacks) == 0
+    def on_callback(self, callback, *args):
+        self._queue.put((callback, args))
 
-    def _callback(self, *in_args):
-        args = []
-        # Convert all char* parameters (i.e. bytes) to proper python strings
-        for arg in in_args:
-            if type(arg) is bytes:
-                args.append(arg.decode(Library.STRING_ENCODING))
-            else:
-                args.append(arg)
-        self.queue.put(args)
-
-    def process(self, **kwargs):
+    def process_callback(self, block):
         try:
-            args = self.queue.get(**kwargs)
+            (callback, args) = self._queue.get(block=block)
             try:
-                # args[-2] is callback id
-                callback = self.callbacks[args[-2]]
-                # args[-1] is context which is always None
-                callback(*args[:-1])
-            except KeyError:
-                pass
+                callback(*args)
             finally:
-                self.queue.task_done()
+                self._queue.task_done()
         except queue.Empty:
             return False
         return True
 
-    def process_pending(self):
-        while self.process(block=False):
-            pass
-
-    def _register(self, registrator, callback):
-        id = registrator(self._callback)
-        self.callbacks[id] = callback
-        return id
-
-    def register_device_event(self, callback):
-        return self._register(self.lib.tdRegisterDeviceEvent, callback)
-
-    def register_device_change_event(self, callback):
-        return self._register(self.lib.tdRegisterDeviceChangeEvent, callback)
-
-    def register_raw_device_event(self, callback):
-        return self._register(self.lib.tdRegisterRawDeviceEvent, callback)
-
-    def register_sensor_event(self, callback):
-        return self._register(self.lib.tdRegisterSensorEvent, callback)
-
-    def register_controller_event(self, callback):
-        return self._register(self.lib.tdRegisterControllerEvent, callback)
-
-    def unregister(self, id):
-        del self.callbacks[id]
-        self.lib.tdUnregisterCallback(id)
-
-    def unregister_all(self):
-        for id in list(self.callbacks.keys()):
-            self.unregister(id)
-
 
 class TelldusCore(object):
-    def __init__(self, library_path=None, callback_manager=None):
+    _callback_dispatcher = None
+
+    def __init__(self, library_path=None, callback_dispatcher=None):
         super(TelldusCore, self).__init__()
-        self.callbacks = None
 
         if library_path is not None:
             self.lib = Library(library_path)
         else:
             self.lib = Library()
 
-        if callback_manager is not None:
-            self.callbacks = callback_manager
+        do_set_dispatcher = True
+        if callback_dispatcher is not None:
+            assert TelldusCore._callback_dispatcher is None
+            TelldusCore._callback_dispatcher = callback_dispatcher
+        elif TelldusCore._callback_dispatcher is None:
+            TelldusCore._callback_dispatcher = QueuedCallbackDispatcher()
         else:
-            self.callbacks = CallbackManager()
+            do_set_dispatcher = False
 
-    def __del__(self):
-        if self.callbacks is not None:
-            self.callbacks.unregister_all()
+        if do_set_dispatcher:
+            self.lib.set_callback_dispatcher(TelldusCore._callback_dispatcher)
 
     def register_device_event(self, callback):
-        return self.callbacks.register_device_event(callback)
+        return self.lib.tdRegisterDeviceEvent(callback)
 
     def register_device_change_event(self, callback):
-        return self.callbacks.register_device_change_event(callback)
+        return self.lib.tdRegisterDeviceChangeEvent(callback)
 
     def register_raw_device_event(self, callback):
-        return self.callbacks.register_raw_device_event(callback)
+        return self.lib.tdRegisterRawDeviceEvent(callback)
 
     def register_sensor_event(self, callback):
-        return self.callbacks.register_sensor_event(callback)
+        return self.lib.tdRegisterSensorEvent(callback)
 
     def register_controller_event(self, callback):
-        return self.callbacks.register_controller_event(callback)
+        return self.lib.tdRegisterControllerEvent(callback)
 
     def unregister_callback(self, id):
-        return self.callbacks.unregister(id)
+        self.lib.tdUnregisterCallback(id)
+
+    def process_callback(self, block=True):
+        return TelldusCore._callback_dispatcher.process_callback(block=block)
 
     def process_pending_callbacks(self):
-        self.callbacks.process_pending()
+        while self.process_callback(block=False):
+            pass
 
     def devices(self):
         devices = []

@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Erik Johansson <erik@ejohansson.se>
+# Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -18,6 +18,7 @@
 from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong, c_void_p
 from ctypes import byref, cast, create_string_buffer, POINTER, sizeof
 import platform
+import threading
 
 
 if platform.system() == 'Windows':
@@ -51,6 +52,16 @@ class TelldusError(Exception):
         return "%s (%d)" % (msg, self.error)
 
 
+class BaseCallbackDispatcher(object):
+    def on_callback(self, callback, *args):
+        pass
+
+
+class DirectCallbackDispatcher(BaseCallbackDispatcher):
+    def on_callback(self, callback, *args):
+        callback(*args)
+
+
 class Library(object):
     STRING_ENCODING = 'utf-8'
 
@@ -60,9 +71,60 @@ class Library(object):
                 string = string.encode(Library.STRING_ENCODING)
             c_char_p.__init__(self, string)
 
+    class CallbackWrapper(object):
+        def __init__(self):
+            self._callbacks = {}
+            self._lock = threading.Lock()
+            self._dispatcher = DirectCallbackDispatcher()
+
+        def set_callback_dispatcher(self, dispatcher):
+            with self._lock:
+                self._dispatcher = dispatcher
+
+        def get_callback_ids(self):
+            with self._lock:
+                return list(self._callbacks.keys())
+
+        def register_callback(self, registrator, functype, callback):
+            wrapper = functype(self._callback)
+            with self._lock:
+                id = registrator(wrapper, None)
+                self._callbacks[id] = (wrapper, callback)
+                return id
+
+        def unregister_callback(self, id):
+            with self._lock:
+                del self._callbacks[id]
+
+        def _callback(self, *in_args):
+            args = []
+            # Convert all char* parameters (i.e. bytes) to proper python
+            # strings
+            for arg in in_args:
+                if type(arg) is bytes:
+                    args.append(arg.decode(Library.STRING_ENCODING))
+                else:
+                    args.append(arg)
+
+            # Get the real callback and the dispatcher
+            with self._lock:
+                try:
+                    # args[-2] is callback id
+                    (wrapper, callback) = self._callbacks[args[-2]]
+                except KeyError:
+                    return
+                dispatcher = self._dispatcher
+
+            # Dispatch the callback, dropping the last parameter which is the
+            # context and always None.
+            try:
+                dispatcher.on_callback(callback, *args[:-1])
+            except:
+                pass
+
     _lib = None
     _refcount = 0
-    _callbacks = {}
+    _callback_wrapper = CallbackWrapper()
 
     _functions = {
         'tdInit': [None, []],
@@ -145,7 +207,7 @@ class Library(object):
                 string = string.decode(Library.STRING_ENCODING)
             return string
 
-        for name, signature in self._functions.items():
+        for name, signature in Library._functions.items():
             try:
                 func = getattr(lib, name)
                 func.restype = signature[0]
@@ -192,18 +254,23 @@ class Library(object):
         assert Library._refcount >= 1
         Library._refcount -= 1
 
-        if Library._refcount == 0:
-            for callback in list(self._callbacks.keys()):
-                try:
-                    self.tdUnregisterCallback(callback)
-                except:
-                    pass
+        if Library._refcount != 0:
+            return
 
-            Library._lib.tdClose()
-            Library._lib = None
+        for id in Library._callback_wrapper.get_callback_ids():
+            try:
+                self.tdUnregisterCallback(id)
+            except:
+                pass
+
+        Library._lib.tdClose()
+        Library._lib = None
+
+    def set_callback_dispatcher(self, dispatcher):
+        Library._callback_wrapper.set_callback_dispatcher(dispatcher)
 
     def __getattr__(self, name):
-        if name in self._functions:
+        if name in Library._functions:
             return getattr(self._lib, name)
         raise AttributeError(name)
 
@@ -217,37 +284,30 @@ class Library(object):
         raise NotImplementedError('should not be called explicitly')
 
     def tdRegisterDeviceEvent(self, callback):
-        func = DEVICE_EVENT_FUNC(callback)
-        id = self._lib.tdRegisterDeviceEvent(func, None)
-        self._callbacks[id] = func
-        return id
+        return Library._callback_wrapper.register_callback(
+            self._lib.tdRegisterDeviceEvent, DEVICE_EVENT_FUNC, callback)
 
     def tdRegisterDeviceChangeEvent(self, callback):
-        func = DEVICE_CHANGE_EVENT_FUNC(callback)
-        id = self._lib.tdRegisterDeviceChangeEvent(func, None)
-        self._callbacks[id] = func
-        return id
+        return Library._callback_wrapper.register_callback(
+            self._lib.tdRegisterDeviceChangeEvent, DEVICE_CHANGE_EVENT_FUNC,
+            callback)
 
     def tdRegisterRawDeviceEvent(self, callback):
-        func = RAW_DEVICE_EVENT_FUNC(callback)
-        id = self._lib.tdRegisterRawDeviceEvent(func, None)
-        self._callbacks[id] = func
-        return id
+        return Library._callback_wrapper.register_callback(
+            self._lib.tdRegisterRawDeviceEvent, RAW_DEVICE_EVENT_FUNC,
+            callback)
 
     def tdRegisterSensorEvent(self, callback):
-        func = SENSOR_EVENT_FUNC(callback)
-        id = self._lib.tdRegisterSensorEvent(func, None)
-        self._callbacks[id] = func
-        return id
+        return Library._callback_wrapper.register_callback(
+            self._lib.tdRegisterSensorEvent, SENSOR_EVENT_FUNC, callback)
 
     def tdRegisterControllerEvent(self, callback):
-        func = CONTROLLER_EVENT_FUNC(callback)
-        id = self._lib.tdRegisterControllerEvent(func, None)
-        self._callbacks[id] = func
-        return id
+        return Library._callback_wrapper.register_callback(
+            self._lib.tdRegisterControllerEvent, CONTROLLER_EVENT_FUNC,
+            callback)
 
     def tdUnregisterCallback(self, id):
-        del self._callbacks[id]
+        Library._callback_wrapper.unregister_callback(id)
         self._lib.tdUnregisterCallback(id)
 
     def tdSensor(self):

@@ -1,4 +1,4 @@
-# Copyright (c) 2012 Erik Johansson <erik@ejohansson.se>
+# Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -40,6 +40,7 @@ class Test(unittest.TestCase):
     def event_tester(self, core, registrator, trigger, trigger_args):
         event_args = {}
         def callback(*args):
+            # Strip away callback id
             event_args[args[-1]] = args[:-1]
 
         id1 = registrator(callback)

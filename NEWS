@@ -2,7 +2,11 @@ tellcore-py <next>
 ==================
 Release date: TBD
 
-* ...
+* Improved callback handling to simplify integration with different event
+  loops. Parameter conversion is now done in the library code and the
+  adaptation to different event loops is done by a simple callback dispatch
+  class. The default dispatcher (when using TelldusCore) is still done using a
+  queue.
 
 
 tellcore-py 0.1
