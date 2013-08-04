@@ -22,7 +22,7 @@ except ImportError:
     import Queue as queue
 
 from .constants import *
-from .library import *
+from .library import Library, TelldusError, BaseCallbackDispatcher
 
 
 class QueuedCallbackDispatcher(BaseCallbackDispatcher):
