@@ -15,6 +15,18 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
+"""
+Contains all constants used in the API.
+
+All the TELLSTICK_* defines documented in the `Telldus Core documentation
+<http://developer.telldus.com/doxygen/group__core.html>`_ are available here.
+
+The recommended usage is to simply do::
+    from tellcore.constants import *
+
+The constants will then be available as TELLSTICK_TURNON, etc.
+"""
+
 # Device methods
 TELLSTICK_TURNON = 1
 TELLSTICK_TURNOFF = 2

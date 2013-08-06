@@ -87,13 +87,19 @@ class TelldusCore(object):
         self.lib.tdUnregisterCallback(id)
 
     def process_callback(self, block=True):
+        """Dispatch a single callback in the current thread."""
         return TelldusCore._callback_dispatcher.process_callback(block=block)
 
     def process_pending_callbacks(self):
+        """Dispatch all pending callbacks in the current thread."""
         while self.process_callback(block=False):
             pass
 
     def devices(self):
+        """Return all known devices.
+
+        :return: list of :class:`Device` instances.
+        """
         devices = []
         count = self.lib.tdGetNumberOfDevices()
         for i in range(count):
@@ -102,6 +108,10 @@ class TelldusCore(object):
         return devices
 
     def sensors(self):
+        """Return all known sensors.
+
+        :return: list of :class:`Sensor` instances.
+        """
         sensors = []
         try:
             while True:
@@ -113,6 +123,12 @@ class TelldusCore(object):
         return sensors
 
     def controllers(self):
+        """Return all known controllers.
+
+        Requires Telldus core library version >= 2.1.2.
+
+        :return: list of :class:`Controller` instances.
+        """
         controllers = []
         try:
             while True:
@@ -124,6 +140,7 @@ class TelldusCore(object):
         return controllers
 
     def add_device(self, name, protocol, model=None, **parameters):
+        """Add a new device to Telldus Core."""
         device = Device(self.lib.tdAddDevice())
         try:
             device.name = name
@@ -151,6 +168,12 @@ class TelldusCore(object):
 
 
 class Device(object):
+    """A device that can be controlled by Telldus Core.
+
+    Can be instantiated directly if the id is known. Otherwise returned from
+    :func:`TelldusCore.add_device` or :func:`TelldusCore.devices`.
+    """
+
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
 
@@ -160,6 +183,7 @@ class Device(object):
         super(Device, self).__setattr__('lib', Library())
 
     def remove(self):
+        """Remove the device from Telldus Core."""
         return self.lib.tdRemoveDevice(self.id)
 
     def __getattr__(self, name):
@@ -206,27 +230,38 @@ class Device(object):
         return self.lib.tdSetDeviceParameter(self.id, name, str(value))
 
     def turn_on(self):
+        """Turn on the device."""
         self.lib.tdTurnOn(self.id)
 
     def turn_off(self):
+        """Turn off the device."""
         self.lib.tdTurnOff(self.id)
 
     def bell(self):
+        """Send "bell" command to the device."""
         self.lib.tdBell(self.id)
 
     def dim(self, level):
+        """Dim the device.
+
+        :param int level: The level to dim to in the range [0, 255].
+        """
         self.lib.tdDim(self.id, level)
 
     def execute(self):
+        """Send "execute" command to the device."""
         self.lib.tdExecute(self.id)
 
     def up(self):
+        """Send "up" command to the device."""
         self.lib.tdUp(self.id)
 
     def down(self):
+        """Send "down" command to the device."""
         self.lib.tdDown(self.id)
 
     def stop(self):
+        """Send "stop" command to the device."""
         self.lib.tdStop(self.id)
 
     def learn(self):

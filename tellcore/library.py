@@ -41,28 +41,74 @@ CONTROLLER_EVENT_FUNC = FUNCTYPE(
 
 
 class TelldusError(Exception):
-    """Error returned from Telldus API.
+    """Error returned from Telldus Core API.
+
+    Automatically raised when a function in the C API returns an error.
+
+    Attributes:
+        error: The error code constant (one of TELLSTICK_ERROR_* from
+        :mod:`tellcore.constants`).
     """
+
     def __init__(self, error):
         super(TelldusError, self).__init__()
         self.error = error
 
     def __str__(self):
+        """Return the human readable error string."""
         msg = Library().tdGetErrorString(self.error)
         return "%s (%d)" % (msg, self.error)
 
 
 class BaseCallbackDispatcher(object):
+    """Base callback dispatcher class.
+
+    Inherit from this class and override the :func:`on_callback` method to
+    change how callbacks are dispatched.
+    """
+
     def on_callback(self, callback, *args):
+        """Called from the callback thread when an event is received.
+
+        :param callable callback: The callback function to call.
+        :param args: The arguments to pass to the callback.
+        """
         pass
 
 
 class DirectCallbackDispatcher(BaseCallbackDispatcher):
+    """Dispatches callbacks directly.
+
+    This is the default callback dispatcher when using the Library class
+    directly. Since the callback is dispatched directly, the callback is called
+    in the callback thread.
+
+    The recommended way is to use the :class:`tellcore.telldus.TelldusCore`
+    class instead, in which case the default dispatcher takes care of
+    dispatching the callback in the main thread.
+    """
+
     def on_callback(self, callback, *args):
         callback(*args)
 
 
 class Library(object):
+    """Wrapper around the Telldus Core C API.
+
+    With the exception of tdInit, tdClose and tdReleaseString, all functions in
+    the C API (see `Telldus Core documentation
+    <http://developer.telldus.com/doxygen/group__core.html>`_) can be
+    called. The parameters are the same as in the C API documentation. The
+    return value are mostly the same as for the C API, except for functions
+    with multiple out parameters.
+
+    The class takes care of:
+       * freeing memory for strings returned from the C API,
+       * converting an error return from a function into an exception
+         (TelldusError),
+       * converts to and from Python strings <=> C style strings.
+    """
+
     STRING_ENCODING = 'utf-8'
 
     class c_string_p(c_char_p):
@@ -71,6 +117,9 @@ class Library(object):
                 string = string.encode(Library.STRING_ENCODING)
             c_char_p.__init__(self, string)
 
+    # Must be a separate class (i.e. not part of Library), to avoid circular
+    # references when saving the wrapper callback function in a class with a
+    # destructor, as the destructor is not called in that case.
     class CallbackWrapper(object):
         def __init__(self):
             self._callbacks = {}
@@ -227,6 +276,9 @@ class Library(object):
 
         The library is only initialized the first time this object is
         created. Subsequent instances uses the same library instance.
+
+        :param str name: Default value is the platform specific name of the
+            Telldus library, but it can be e.g. an absolute path.
         """
         super(Library, self).__init__()
 
@@ -267,6 +319,10 @@ class Library(object):
         Library._lib = None
 
     def set_callback_dispatcher(self, dispatcher):
+        """Change the callback dispatcher.
+
+        See documentation for :class:`BaseCallbackDispatcher`.
+        """
         Library._callback_wrapper.set_callback_dispatcher(dispatcher)
 
     def __getattr__(self, name):
@@ -311,6 +367,10 @@ class Library(object):
         self._lib.tdUnregisterCallback(id)
 
     def tdSensor(self):
+        """Get the next sensor while iterating.
+
+        :return: a dict with the keys: protocol, model, id, datatypes.
+        """
         protocol = create_string_buffer(20)
         model = create_string_buffer(20)
         id = c_int()
@@ -323,6 +383,10 @@ class Library(object):
                 'id': id.value, 'datatypes': datatypes.value}
 
     def tdSensorValue(self, protocol, model, id, datatype):
+        """Get the sensor value for a given sensor.
+
+        :return: a dict with the keys: value, timestamp.
+        """
         value = create_string_buffer(20)
         timestamp = c_int()
 
@@ -331,6 +395,10 @@ class Library(object):
         return {'value': self._to_str(value), 'timestamp': timestamp.value}
 
     def tdController(self):
+        """Get the next controller while iterating.
+
+        :return: a dict with the keys: id, type, name, available.
+        """
         id = c_int()
         type = c_int()
         name = create_string_buffer(255)
