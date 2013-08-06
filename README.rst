@@ -4,10 +4,7 @@ Python wrapper for Telldus Core
 tellcore-py is a Python wrapper for `Telldus' <http://www.telldus.com/>`_ home
 automation library `Telldus Core <http://developer.telldus.se/doxygen/>`_.
 
-The module consists of a number of separate classes to make the library easier
-and more python-ish to work with. See the `internals`_ section below for more
-details.
-
+* Documentation: https://tellcore-py.readthedocs.org/
 * Official home page: https://github.com/erijo/tellcore-py
 * Python package index: https://pypi.python.org/pypi/tellcore-py
 
@@ -64,4 +61,3 @@ TODO
 
 * Improve documentation.
 * Add high level support for device groups.
-* Refactor callback manager to ease integration with different event loops.
