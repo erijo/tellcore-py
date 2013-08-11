@@ -1,6 +1,6 @@
-tellcore-py <next>
+tellcore-py 0.8.0
 ==================
-Release date: TBD
+Release date: 2013-08-11
 
 * Improved callback handling to simplify integration with different event
   loops. Parameter conversion is now done in the library code and the
@@ -8,9 +8,14 @@ Release date: TBD
   class. The default dispatcher (when using TelldusCore) is still done using a
   queue.
 
+* New documentation for parts of the package. Can be read online at
+  https://tellcore-py.readthedocs.org/.
 
-tellcore-py 0.1
-===============
+* Fix problem with strings and python 3 (issue #2).
+
+
+tellcore-py 0.1.0
+=================
 Release date: 2013-06-26
 
 * First release.

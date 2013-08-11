@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='tellcore-py',
-    version='0.1.0',
+    version='0.8.0',
     author='Erik Johansson',
     author_email='erik@ejohansson.se',
     packages=['tellcore'],
