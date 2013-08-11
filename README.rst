@@ -41,6 +41,9 @@ all devices off. ::
     for device in core.devices():
         device.turn_off()
 
+More examples can be found in the `bin
+<https://github.com/erijo/tellcore-py/tree/master/bin>`_ directory.
+
 Internals
 ---------
 
