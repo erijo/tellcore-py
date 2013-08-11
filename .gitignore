@@ -2,4 +2,4 @@
 *.pyc
 MANIFEST
 dist/
-_build/
+docs/_build/
