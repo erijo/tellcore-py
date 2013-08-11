@@ -104,7 +104,7 @@ class TelldusCore(object):
         count = self.lib.tdGetNumberOfDevices()
         for i in range(count):
             id = self.lib.tdGetDeviceId(i)
-            devices.append(Device(id))
+            devices.append(Device(id, lib=self.lib))
         return devices
 
     def sensors(self):
@@ -116,7 +116,7 @@ class TelldusCore(object):
         try:
             while True:
                 sensor = self.lib.tdSensor()
-                sensors.append(Sensor(**sensor))
+                sensors.append(Sensor(lib=self.lib, **sensor))
         except TelldusError as e:
             if e.error != TELLSTICK_ERROR_DEVICE_NOT_FOUND:
                 raise
@@ -133,7 +133,7 @@ class TelldusCore(object):
         try:
             while True:
                 controller = self.lib.tdController()
-                controllers.append(Controller(**controller))
+                controllers.append(Controller(lib=self.lib, **controller))
         except TelldusError as e:
             if e.error != TELLSTICK_ERROR_NOT_FOUND:
                 raise
@@ -177,10 +177,12 @@ class Device(object):
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
 
-    def __init__(self, id):
+    def __init__(self, id, lib=None):
+        lib = Library() if lib is None else lib
+
         super(Device, self).__init__()
         super(Device, self).__setattr__('id', id)
-        super(Device, self).__setattr__('lib', Library())
+        super(Device, self).__setattr__('lib', lib)
 
     def remove(self):
         """Remove the device from Telldus Core."""
@@ -278,13 +280,13 @@ class Device(object):
 
 
 class Sensor(object):
-    def __init__(self, protocol, model, id, datatypes):
+    def __init__(self, protocol, model, id, datatypes, lib=None):
         super(Sensor, self).__init__()
         self.protocol = protocol
         self.model = model
         self.id = id
         self.datatypes = datatypes
-        self.lib = Library()
+        self.lib = Library() if lib is None else lib
 
     def value(self, datatype):
         value = self.lib.tdSensorValue(
@@ -314,13 +316,15 @@ class SensorValue(object):
 
 
 class Controller(object):
-    def __init__(self, id, type, name, available):
+    def __init__(self, id, type, name, available, lib=None):
+        lib = Library() if lib is None else lib
+
         super(Controller, self).__init__()
         super(Controller, self).__setattr__('id', id)
         super(Controller, self).__setattr__('type', type)
         super(Controller, self).__setattr__('name', name)
         super(Controller, self).__setattr__('available', available)
-        super(Controller, self).__setattr__('lib', Library())
+        super(Controller, self).__setattr__('lib', lib)
 
     def __getattr__(self, name):
         try:
