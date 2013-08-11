@@ -74,7 +74,7 @@ class BaseCallbackDispatcher(object):
         :param callable callback: The callback function to call.
         :param args: The arguments to pass to the callback.
         """
-        pass
+        raise NotImplementedError
 
 
 class DirectCallbackDispatcher(BaseCallbackDispatcher):
