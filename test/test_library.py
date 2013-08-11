@@ -21,6 +21,7 @@ import tellcore.library
 from tellcore.constants import *
 
 import ctypes
+import gc
 import mocklib
 
 Library = tellcore.library.Library
@@ -47,6 +48,9 @@ class Test(unittest.TestCase):
         self.loader = mocklib.MockLibLoader(self.mocklib)
         tellcore.library.DllLoader = self.loader
 
+    def tearDown(self):
+        gc.collect()
+
     def test_libloader(self):
         self.assertEqual(self.loader.load_count, 0)
         lib = Library()
@@ -60,6 +64,8 @@ class Test(unittest.TestCase):
         self.assertEqual(self.loader.load_count, 1)
 
         lib1 = lib2 = None
+        gc.collect()
+
         lib = Library()
         self.assertEqual(self.loader.load_count, 2)
 
@@ -71,8 +77,11 @@ class Test(unittest.TestCase):
         self.assertTrue(self.initialized)
 
         lib1 = None
+        gc.collect()
         self.assertTrue(self.initialized)
+
         lib2 = None
+        gc.collect()
         self.assertFalse(self.initialized)
 
     def test_private_methods(self):
@@ -147,6 +156,7 @@ class Test(unittest.TestCase):
         def tdSetName(id, name):
             self.assertIs(type(name), bytes)
             self.assertEqual(name, test_name)
+            return TELLSTICK_SUCCESS
         self.mocklib.tdSetName = tdSetName
 
         lib = Library()
@@ -185,7 +195,9 @@ class Test(unittest.TestCase):
 
         self.assertEqual(len(registered_ids), 5)
         self.assertEqual(len(unregistered_ids), 0)
+
         lib = None
+        gc.collect()
         self.assertEqual(registered_ids, unregistered_ids)
 
     def test_callback_shared(self):

@@ -22,6 +22,7 @@ from tellcore.constants import *
 import tellcore.library
 
 from ctypes import c_char_p, c_int, create_string_buffer
+import gc
 import mocklib
 
 
@@ -36,6 +37,7 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         self.mockdispatcher.stop()
+        gc.collect()
 
     def event_tester(self, core, registrator, trigger, trigger_args):
         event_args = {}
@@ -151,8 +153,13 @@ class Test(unittest.TestCase):
 
                 protocol.value = sensor['protocol']
                 model.value = sensor['model']
-                id._obj.value = sensor['id']
-                datatypes._obj.value = sensor['datatypes']
+                try:
+                    id._obj.value = sensor['id']
+                    datatypes._obj.value = sensor['datatypes']
+                except AttributeError:
+                    # With pypy we must use contents instead of _obj
+                    id.contents.value = sensor['id']
+                    datatypes.contents.value = sensor['datatypes']
                 return TELLSTICK_SUCCESS
             else:
                 self.sensor_index = 0
