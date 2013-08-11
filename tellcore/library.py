@@ -50,13 +50,14 @@ class TelldusError(Exception):
         :mod:`tellcore.constants`).
     """
 
-    def __init__(self, error):
+    def __init__(self, error, lib=None):
         super(TelldusError, self).__init__()
         self.error = error
+        self.lib = Library() if lib is None else lib
 
     def __str__(self):
         """Return the human readable error string."""
-        msg = Library().tdGetErrorString(self.error)
+        msg = self.lib.tdGetErrorString(self.error)
         return "%s (%d)" % (msg, self.error)
 
 
