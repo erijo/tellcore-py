@@ -3,3 +3,6 @@ include LICENSE.txt
 include run_tests test/*.py
 include bin/*
 prune bin/*~
+include docs/*
+prune docs/_build
+
