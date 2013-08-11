@@ -112,10 +112,19 @@ class Library(object):
     STRING_ENCODING = 'utf-8'
 
     class c_string_p(c_char_p):
-        def __init__(self, string):
-            if type(string) is str or type(string) is unicode:
-                string = string.encode(Library.STRING_ENCODING)
-            c_char_p.__init__(self, string)
+        def __init__(self, param):
+            c_char_p.__init__(self, param.encode(Library.STRING_ENCODING))
+
+        @classmethod
+        def from_param(cls, param):
+            if type(param) is str:
+                return cls(param)
+            try:
+                if type(param) is unicode:
+                    return cls(param)
+            except NameError:
+                pass # The unicode type does not exist in python 3
+            return c_char_p.from_param(param)
 
     # Must be a separate class (i.e. not part of Library), to avoid circular
     # references when saving the wrapper callback function in a class with a

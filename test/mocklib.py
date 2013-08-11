@@ -89,11 +89,11 @@ class MockCFunction(object):
             if type(value) is not c_type:
                 # The 'raw' attribute is the pointer for string buffers
                 if hasattr(value, 'raw'):
-                    c_value = c_type(value.raw)
+                    c_type.from_param(value.raw)
                 elif type(value) is not ByRefArgType:
-                    c_value = c_type(value)
+                    c_type.from_param(value)
                     # Pass the possibly converted value instead of the original
-                    c_args[-1] = c_value.value
+                    c_args[-1] = c_type(value).value
 
         res = self.implementation(*c_args)
 
@@ -103,7 +103,7 @@ class MockCFunction(object):
             res = ctypes.cast(res, ctypes.c_void_p)
         # For the rest, verify that the return value is of correct type.
         elif self.restype is not None:
-            c_value = self.restype(res)
+            self.restype.from_param(res)
 
         if self.errcheck is not None:
             res = self.errcheck(res, self, args)

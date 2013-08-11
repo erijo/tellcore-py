@@ -143,14 +143,15 @@ class Test(unittest.TestCase):
         lib.tdSetControllerValue(1, "aString", "aSecondString")
 
     def test_unicode(self):
+        test_name = b'\xc3\xa5\xc3\xa4\xc3\xb6'
         def tdSetName(id, name):
-            self.assertEqual(name, u"\xe5\xe4\xf6".encode(
-                    Library.STRING_ENCODING))
+            self.assertIs(type(name), bytes)
+            self.assertEqual(name, test_name)
         self.mocklib.tdSetName = tdSetName
 
         lib = Library()
 
-        lib.tdSetName(1, u"\xe5\xe4\xf6")
+        lib.tdSetName(1, test_name.decode(Library.STRING_ENCODING))
 
     def setup_callback(self, registered_ids, unregistered_ids):
         def tdRegisterEvent(*args):
