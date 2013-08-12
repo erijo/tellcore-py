@@ -150,12 +150,14 @@ class TelldusCore(object):
             for key, value in parameters.items():
                 device.set_parameter(key, value)
             return device
-        except Exception as e:
+        except Exception:
+            import sys
+            exc_info = sys.exc_info()
             try:
                 device.remove()
             except:
                 pass
-            raise e
+            raise exc_info[0], exc_info[1], exc_info[2]
 
     def send_raw_command(self, command, reserved=0):
         return self.lib.tdSendRawCommand(command, reserved)
