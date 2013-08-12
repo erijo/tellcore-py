@@ -22,6 +22,17 @@ Features
   bytes used by the C-library and strings as used by python).
 * Takes care of making callbacks from the library thread-safe.
 * Unit tested.
+* Besides being useful with the regular Python implementation (a.k.a. `CPython
+  <http://en.wikipedia.org/wiki/CPython>`_), it also works with `pypy
+  <http://pypy.org/>`_.
+* Open source (`GPLv3+
+  <https://github.com/erijo/tellcore-py/blob/master/LICENSE.txt>`_).
+
+Requirements
+------------
+
+* Python
+* `Telldus Core library <http://telldus.com/products/nativesoftware>`_
 
 Users
 -----
