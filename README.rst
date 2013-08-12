@@ -8,6 +8,9 @@ automation library `Telldus Core <http://developer.telldus.se/doxygen/>`_.
 * Official home page: https://github.com/erijo/tellcore-py
 * Python package index: https://pypi.python.org/pypi/tellcore-py
 
+Please report any problem as a `GitHub issue report
+<https://github.com/erijo/tellcore-py/issues/new>`_.
+
 Features
 --------
 
