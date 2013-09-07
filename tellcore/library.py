@@ -261,7 +261,7 @@ class Library(object):
 
         def check_bool_result(result, func, args):
             if not result:
-                raise TelldusError(-1)
+                raise TelldusError(-3)
             return result
 
         def free_string(result, func, args):
