@@ -133,6 +133,8 @@ class TelldusCore(object):
         try:
             while True:
                 controller = self.lib.tdController()
+                del controller["name"]
+                del controller["available"]
                 controllers.append(Controller(lib=self.lib, **controller))
         except TelldusError as e:
             if e.error != TELLSTICK_ERROR_NOT_FOUND:
@@ -331,14 +333,12 @@ class SensorValue(object):
 
 
 class Controller(object):
-    def __init__(self, id, type, name, available, lib=None):
+    def __init__(self, id, type, lib=None):
         lib = Library() if lib is None else lib
 
         super(Controller, self).__init__()
         super(Controller, self).__setattr__('id', id)
         super(Controller, self).__setattr__('type', type)
-        super(Controller, self).__setattr__('name', name)
-        super(Controller, self).__setattr__('available', available)
         super(Controller, self).__setattr__('lib', lib)
 
     def __getattr__(self, name):
