@@ -286,6 +286,14 @@ class Device(object):
 
 
 class Sensor(object):
+    DATATYPES = {"temperature": TELLSTICK_TEMPERATURE,
+                 "humidity": TELLSTICK_HUMIDITY,
+                 "rainrate": TELLSTICK_RAINRATE,
+                 "raintotal": TELLSTICK_RAINTOTAL,
+                 "winddirection": TELLSTICK_WINDDIRECTION,
+                 "windaverage": TELLSTICK_WINDAVERAGE,
+                 "windgust": TELLSTICK_WINDGUST}
+
     def __init__(self, protocol, model, id, datatypes, lib=None):
         super(Sensor, self).__init__()
         self.protocol = protocol
@@ -294,22 +302,23 @@ class Sensor(object):
         self.datatypes = datatypes
         self.lib = Library() if lib is None else lib
 
+    def has_value(self, datatype):
+        return (self.datatypes & datatype) != 0
+
     def value(self, datatype):
         value = self.lib.tdSensorValue(
             self.protocol, self.model, self.id, datatype)
         return SensorValue(value['value'], value['timestamp'])
 
-    def has_temperature(self):
-        return self.datatypes & TELLSTICK_TEMPERATURE != 0
-
-    def has_humidity(self):
-        return self.datatypes & TELLSTICK_HUMIDITY != 0
-
-    def temperature(self):
-        return self.value(TELLSTICK_TEMPERATURE)
-
-    def humidity(self):
-        return self.value(TELLSTICK_HUMIDITY)
+    def __getattr__(self, name):
+        typename = name.replace("has_", "", 1)
+        if typename in Sensor.DATATYPES:
+            datatype = Sensor.DATATYPES[typename]
+            if name == typename:
+                return lambda: self.value(datatype)
+            else:
+                return lambda: self.has_value(datatype)
+        raise AttributeError(name)
 
 
 class SensorValue(object):

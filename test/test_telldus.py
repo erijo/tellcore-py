@@ -144,9 +144,17 @@ class Test(unittest.TestCase):
             sensors = [{'protocol': b"proto_1", 'model': b"model_1", 'id': 1,
                         'datatypes': TELLSTICK_TEMPERATURE},
                        {'protocol': b"proto_2", 'model': b"model_2", 'id': 2,
-                        'datatypes': TELLSTICK_TEMPERATURE},
+                        'datatypes': TELLSTICK_HUMIDITY},
                        {'protocol': b"proto_3", 'model': b"model_3", 'id': 3,
-                        'datatypes': TELLSTICK_HUMIDITY}]
+                        'datatypes': TELLSTICK_RAINRATE},
+                       {'protocol': b"proto_4", 'model': b"model_4", 'id': 4,
+                        'datatypes': TELLSTICK_RAINTOTAL},
+                       {'protocol': b"proto_5", 'model': b"model_5", 'id': 5,
+                        'datatypes': TELLSTICK_WINDDIRECTION},
+                       {'protocol': b"proto_6", 'model': b"model_6", 'id': 6,
+                        'datatypes': TELLSTICK_WINDAVERAGE},
+                       {'protocol': b"proto_7", 'model': b"model_7", 'id': 7,
+                        'datatypes': TELLSTICK_WINDGUST}]
             if self.sensor_index < len(sensors):
                 sensor = sensors[self.sensor_index]
                 self.sensor_index += 1
@@ -165,19 +173,61 @@ class Test(unittest.TestCase):
                 self.sensor_index = 0
                 return TELLSTICK_ERROR_DEVICE_NOT_FOUND
         self.mocklib.tdSensor = tdSensor
+
+        def tdSensorValue(protocol, model, id, datatype, value, v_len, times):
+            if datatype == 1 << (id - 1):
+                value.value = ("%d" % (id * 100 + datatype)).encode(
+                    tellcore.library.Library.STRING_ENCODING)
+                return TELLSTICK_SUCCESS
+            else:
+                return TELLSTICK_ERROR_METHOD_NOT_SUPPORTED
+        self.mocklib.tdSensorValue = tdSensorValue
         
         core = TelldusCore()
         sensors = core.sensors()
 
-        self.assertEqual(3, len(sensors))
-        self.assertEqual(["proto_1", "proto_2", "proto_3"],
+        self.assertEqual(7, len(sensors))
+        self.assertEqual(["proto_%d" % i for i in range(1, 8)],
                          [s.protocol for s in sensors])
-        self.assertEqual(["model_1", "model_2", "model_3"],
+        self.assertEqual(["model_%d" % i for i in range(1, 8)],
                          [s.model for s in sensors])
-        self.assertEqual([1, 2, 3], [s.id for s in sensors])
-        self.assertEqual([TELLSTICK_TEMPERATURE, TELLSTICK_TEMPERATURE,
-                          TELLSTICK_HUMIDITY],
+        self.assertEqual(list(range(1, 8)),
+                         [s.id for s in sensors])
+        self.assertEqual([TELLSTICK_TEMPERATURE, TELLSTICK_HUMIDITY,
+                          TELLSTICK_RAINRATE, TELLSTICK_RAINTOTAL,
+                          TELLSTICK_WINDDIRECTION, TELLSTICK_WINDAVERAGE,
+                          TELLSTICK_WINDGUST],
                          [s.datatypes for s in sensors])
+
+        self.assertEqual([False]*0 + [True] + [False]*6,
+                         [s.has_temperature() for s in sensors])
+        self.assertEqual([False]*1 + [True] + [False]*5,
+                         [s.has_humidity() for s in sensors])
+        self.assertEqual([False]*2 + [True] + [False]*4,
+                         [s.has_rainrate() for s in sensors])
+        self.assertEqual([False]*3 + [True] + [False]*3,
+                         [s.has_raintotal() for s in sensors])
+        self.assertEqual([False]*4 + [True] + [False]*2,
+                         [s.has_winddirection() for s in sensors])
+        self.assertEqual([False]*5 + [True] + [False]*1,
+                         [s.has_windaverage() for s in sensors])
+        self.assertEqual([False]*6 + [True] + [False]*0,
+                         [s.has_windgust() for s in sensors])
+
+        self.assertEqual("%d" % (100 + TELLSTICK_TEMPERATURE),
+                         sensors[0].temperature().value)
+        self.assertEqual("%d" % (200 + TELLSTICK_HUMIDITY),
+                         sensors[1].humidity().value)
+        self.assertEqual("%d" % (300 + TELLSTICK_RAINRATE),
+                         sensors[2].rainrate().value)
+        self.assertEqual("%d" % (400 + TELLSTICK_RAINTOTAL),
+                         sensors[3].raintotal().value)
+        self.assertEqual("%d" % (500 + TELLSTICK_WINDDIRECTION),
+                         sensors[4].winddirection().value)
+        self.assertEqual("%d" % (600 + TELLSTICK_WINDAVERAGE),
+                         sensors[5].windaverage().value)
+        self.assertEqual("%d" % (700 + TELLSTICK_WINDGUST),
+                         sensors[6].windgust().value)
 
 if __name__ == '__main__':
     unittest.main()

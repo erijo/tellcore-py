@@ -6,6 +6,8 @@ Release date: TBD
   tdSetModel, tdSetDeviceParameter and tdRemoveDevice) now raise an exception
   instead of returning False.
 
+* Support for rain- and windsensors.
+
 
 tellcore-py 0.8.0
 ==================
