@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+import sys
+
+import tellcore.telldus as td
+from tellcore.constants import *
+
+core = td.TelldusCore()
+
+try:
+    controllers = core.controllers()
+except Exception as e:
+    print("Error: unable to list controllers (are you using telldus-core >= 2.1.2?)")
+    print(e)
+    sys.exit(1)
+
+TYPES = {TELLSTICK_CONTROLLER_TELLSTICK: 'TellStick',
+         TELLSTICK_CONTROLLER_TELLSTICK_DUO: "TellStick Duo",
+         TELLSTICK_CONTROLLER_TELLSTICK_NET: "TellStick Net"}
+
+for controller in controllers:
+    print("{}\n  name: {}\n  serial: {}\n  firmware: {}\n  available: {}".format(
+            TYPES[controller.type], controller.name, controller.serial,
+            controller.firmware, controller.available))
+
+print("\nFound {} controller(s)".format(len(controllers)))
