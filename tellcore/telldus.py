@@ -157,7 +157,11 @@ class TelldusCore(object):
                 device.remove()
             except:
                 pass
-            raise exc_info[0], exc_info[1], exc_info[2]
+
+            if "with_traceback" in dir(Exception):
+                raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
+            else:
+                exec("raise exc_info[0], exc_info[1], exc_info[2]")
 
     def send_raw_command(self, command, reserved=0):
         return self.lib.tdSendRawCommand(command, reserved)
