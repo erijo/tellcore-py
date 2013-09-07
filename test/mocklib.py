@@ -45,6 +45,7 @@ class MockTelldusCoreLib(object):
         self.tdClose = lambda: None
 
         self.tdReleaseString = lambda x: None
+        self.tdGetErrorString = lambda x: None
 
     def __getattr__(self, name):
         if name in tellcore.library.Library._functions:

@@ -114,28 +114,28 @@ class Test(unittest.TestCase):
         self.assertEqual(returned, released)
 
     def test_string_parameter(self):
-        def int_strings(ignore, string1, string2="defaultValue"):
+        def int_strings(ret, ignore, string1, string2="defaultValue"):
             self.assertEqual(string1, b"aString")
             if string2 != "defaultValue":
                 self.assertEqual(string2, b"aSecondString")
-            return 0
+            return ret
 
-        string_int = lambda s, i: int_strings(i, s)
-        ints_string = lambda i1, i2, s: int_strings(i1, s)
-        strings_ignore = lambda s1, s2, *args: int_strings(0, s1, s2)
-        int_string_ignore = lambda i, s, *args: int_strings(i, s)
+        string_int = lambda s, i: int_strings(0, i, s)
+        ints_string = lambda i1, i2, s: int_strings(0, i1, s)
+        strings_ignore = lambda s1, s2, *args: int_strings(0, 0, s1, s2)
+        int_string_ignore = lambda i, s, *args: int_strings(0, i, s)
 
-        self.mocklib.tdSetName = int_strings
-        self.mocklib.tdSetProtocol = int_strings
-        self.mocklib.tdSetModel = int_strings
-        self.mocklib.tdSetDeviceParameter = int_strings
-        self.mocklib.tdGetDeviceParameter = int_strings
+        self.mocklib.tdSetName = lambda *a: int_strings(True, *a)
+        self.mocklib.tdSetProtocol = lambda *a: int_strings(True, *a)
+        self.mocklib.tdSetModel = lambda *a: int_strings(True, *a)
+        self.mocklib.tdSetDeviceParameter = lambda *a: int_strings(True, *a)
+        self.mocklib.tdGetDeviceParameter = lambda *a: int_strings(0, *a)
         self.mocklib.tdSendRawCommand = string_int
         self.mocklib.tdConnectTellStickController = ints_string
         self.mocklib.tdDisconnectTellStickController = ints_string
         self.mocklib.tdSensorValue = strings_ignore
         self.mocklib.tdControllerValue = int_string_ignore
-        self.mocklib.tdSetControllerValue = int_strings
+        self.mocklib.tdSetControllerValue = lambda *a: int_strings(0, *a)
 
         lib = Library()
 
@@ -156,7 +156,7 @@ class Test(unittest.TestCase):
         def tdSetName(id, name):
             self.assertIs(type(name), bytes)
             self.assertEqual(name, test_name)
-            return TELLSTICK_SUCCESS
+            return True
         self.mocklib.tdSetName = tdSetName
 
         lib = Library()

@@ -254,9 +254,14 @@ class Library(object):
         return char_p.value.decode(Library.STRING_ENCODING)
 
     def _setup_functions(self, lib):
-        def check_result(result, func, args):
+        def check_int_result(result, func, args):
             if result < 0:
                 raise TelldusError(result)
+            return result
+
+        def check_bool_result(result, func, args):
+            if not result:
+                raise TelldusError(-1)
             return result
 
         def free_string(result, func, args):
@@ -273,7 +278,9 @@ class Library(object):
                 func.argtypes = signature[1]
 
                 if func.restype == c_int:
-                    func.errcheck = check_result
+                    func.errcheck = check_int_result
+                elif func.restype == c_bool:
+                    func.errcheck = check_bool_result
                 elif func.restype == c_char_p:
                     func.restype = c_void_p
                     func.errcheck = free_string

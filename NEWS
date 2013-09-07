@@ -1,3 +1,12 @@
+tellcore-py <next>
+==================
+Release date: TBD
+
+* Telldus functions that used to return bool (tdSetName, tdSetProtocol,
+  tdSetModel, tdSetDeviceParameter and tdRemoveDevice) now raise an exception
+  instead of returning False.
+
+
 tellcore-py 0.8.0
 ==================
 Release date: 2013-08-11

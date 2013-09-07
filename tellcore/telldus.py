@@ -216,7 +216,7 @@ class Device(object):
             func = self.lib.tdSetModel
         else:
             raise AttributeError(name)
-        return func(self.id, value)
+        func(self.id, value)
 
     def parameters(self):
         parameters = {}
@@ -235,7 +235,7 @@ class Device(object):
         return value
 
     def set_parameter(self, name, value):
-        return self.lib.tdSetDeviceParameter(self.id, name, str(value))
+        self.lib.tdSetDeviceParameter(self.id, name, str(value))
 
     def turn_on(self):
         """Turn on the device."""
