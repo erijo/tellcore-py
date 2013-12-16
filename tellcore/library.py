@@ -26,7 +26,10 @@ if platform.system() == 'Windows':
     LIBRARY_NAME = 'TelldusCore.dll'
 else:
     from ctypes import CFUNCTYPE as FUNCTYPE, cdll as DllLoader
-    LIBRARY_NAME = 'libtelldus-core.so.2'
+    if platform.system() == 'Darwin':
+        LIBRARY_NAME = '/Library/Frameworks/TelldusCore.framework/TelldusCore'
+    else:
+        LIBRARY_NAME = 'libtelldus-core.so.2'
 
 DEVICE_EVENT_FUNC = FUNCTYPE(
     None, c_int, c_int, c_char_p, c_int, c_void_p)
