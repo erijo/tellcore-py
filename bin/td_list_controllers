@@ -19,8 +19,13 @@ TYPES = {TELLSTICK_CONTROLLER_TELLSTICK: 'TellStick',
          TELLSTICK_CONTROLLER_TELLSTICK_NET: "TellStick Net"}
 
 for controller in controllers:
+    try:
+        name = controller.name
+    except AttributeError:
+        name = "<unnamed>"
+
     print("{}\n  name: {}\n  serial: {}\n  firmware: {}\n  available: {}".format(
-            TYPES[controller.type], controller.name, controller.serial,
+            TYPES[controller.type], name, controller.serial,
             controller.firmware, controller.available))
 
 print("\nFound {} controller(s)".format(len(controllers)))
