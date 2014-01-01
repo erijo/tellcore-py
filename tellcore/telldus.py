@@ -310,7 +310,7 @@ class Sensor(object):
     def value(self, datatype):
         value = self.lib.tdSensorValue(
             self.protocol, self.model, self.id, datatype)
-        return SensorValue(value['value'], value['timestamp'])
+        return SensorValue(datatype, value['value'], value['timestamp'])
 
     def __getattr__(self, name):
         typename = name.replace("has_", "", 1)
@@ -324,10 +324,11 @@ class Sensor(object):
 
 
 class SensorValue(object):
-    __slots__ = ["value", "timestamp"]
+    __slots__ = ["datatype", "value", "timestamp"]
 
-    def __init__(self, value, timestamp):
+    def __init__(self, datatype, value, timestamp):
         super(SensorValue, self).__init__()
+        self.datatype = datatype
         self.value = value
         self.timestamp = timestamp
 

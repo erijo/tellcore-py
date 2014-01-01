@@ -8,6 +8,8 @@ Release date: TBD
 
 * Support for rain- and windsensors.
 
+* Include data type in SensorValue.
+
 
 tellcore-py 0.8.0
 ==================
