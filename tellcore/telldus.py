@@ -103,8 +103,8 @@ class TelldusCore(object):
         devices = []
         count = self.lib.tdGetNumberOfDevices()
         for i in range(count):
-            id = self.lib.tdGetDeviceId(i)
-            devices.append(Device(id, lib=self.lib))
+            device = Device(self.lib.tdGetDeviceId(i), lib=self.lib)
+            devices.append(device)
         return devices
 
     def sensors(self):
@@ -143,7 +143,7 @@ class TelldusCore(object):
 
     def add_device(self, name, protocol, model=None, **parameters):
         """Add a new device to Telldus Core."""
-        device = Device(self.lib.tdAddDevice())
+        device = Device(self.lib.tdAddDevice(), lib=self.lib)
         try:
             device.name = name
             device.protocol = protocol
@@ -186,9 +186,9 @@ class Device(object):
                   "fade"]
 
     def __init__(self, id, lib=None):
-        lib = Library() if lib is None else lib
-
         super(Device, self).__init__()
+
+        lib = Library() if lib is None else lib
         super(Device, self).__setattr__('id', id)
         super(Device, self).__setattr__('lib', lib)
 
