@@ -3,7 +3,7 @@
 import sys
 import unittest
 
-tests = unittest.TestLoader().discover("test")
+tests = unittest.TestLoader().discover("tests")
 res = unittest.runner.TextTestRunner().run(tests)
 
 sys.exit(not res.wasSuccessful())
