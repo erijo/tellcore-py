@@ -1,6 +1,6 @@
-tellcore-py <next>
+tellcore-py 0.9.0
 ==================
-Release date: TBD
+Release date: 2014-01-03
 
 * Telldus functions that used to return bool (tdSetName, tdSetProtocol,
   tdSetModel, tdSetDeviceParameter and tdRemoveDevice) now raise an exception

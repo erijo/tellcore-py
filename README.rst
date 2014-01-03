@@ -27,6 +27,7 @@ Features
   <http://pypy.org/>`_.
 * Open source (`GPLv3+
   <https://github.com/erijo/tellcore-py/blob/master/LICENSE.txt>`_).
+* Works on Linux, Mac OS X and Windows.
 
 Requirements
 ------------
