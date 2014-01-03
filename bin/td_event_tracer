@@ -36,7 +36,7 @@ TYPES = {const.TELLSTICK_CONTROLLER_TELLSTICK: 'tellstick',
 
 
 def device_event(id_, method, data, cid):
-    method_string = METHODS.get(method, "UNKNOWN STATE {0}".format(method))
+    method_string = METHODS.get(method, "UNKNOWN METHOD {0}".format(method))
     string = "[DEVICE] {0} -> {1}".format(id_, method_string)
     if method == const.TELLSTICK_DIM:
         string += " [{0}]".format(data)
