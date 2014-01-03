@@ -21,8 +21,8 @@ except ImportError:
     # Fall back on old (python 2) variant
     import Queue as queue
 
-from .constants import *
-from .library import Library, TelldusError, BaseCallbackDispatcher
+import tellcore.constants as const
+from tellcore.library import Library, TelldusError, BaseCallbackDispatcher
 
 
 class QueuedCallbackDispatcher(BaseCallbackDispatcher):
@@ -118,7 +118,7 @@ class TelldusCore(object):
                 sensor = self.lib.tdSensor()
                 sensors.append(Sensor(lib=self.lib, **sensor))
         except TelldusError as e:
-            if e.error != TELLSTICK_ERROR_DEVICE_NOT_FOUND:
+            if e.error != const.TELLSTICK_ERROR_DEVICE_NOT_FOUND:
                 raise
         return sensors
 
@@ -137,7 +137,7 @@ class TelldusCore(object):
                 del controller["available"]
                 controllers.append(Controller(lib=self.lib, **controller))
         except TelldusError as e:
-            if e.error != TELLSTICK_ERROR_NOT_FOUND:
+            if e.error != const.TELLSTICK_ERROR_NOT_FOUND:
                 raise
         return controllers
 
@@ -288,13 +288,13 @@ class Device(object):
 
 
 class Sensor(object):
-    DATATYPES = {"temperature": TELLSTICK_TEMPERATURE,
-                 "humidity": TELLSTICK_HUMIDITY,
-                 "rainrate": TELLSTICK_RAINRATE,
-                 "raintotal": TELLSTICK_RAINTOTAL,
-                 "winddirection": TELLSTICK_WINDDIRECTION,
-                 "windaverage": TELLSTICK_WINDAVERAGE,
-                 "windgust": TELLSTICK_WINDGUST}
+    DATATYPES = {"temperature": const.TELLSTICK_TEMPERATURE,
+                 "humidity": const.TELLSTICK_HUMIDITY,
+                 "rainrate": const.TELLSTICK_RAINRATE,
+                 "raintotal": const.TELLSTICK_RAINTOTAL,
+                 "winddirection": const.TELLSTICK_WINDDIRECTION,
+                 "windaverage": const.TELLSTICK_WINDAVERAGE,
+                 "windgust": const.TELLSTICK_WINDGUST}
 
     def __init__(self, protocol, model, id, datatypes, lib=None):
         super(Sensor, self).__init__()
@@ -346,7 +346,7 @@ class Controller(object):
         try:
             return self.lib.tdControllerValue(self.id, name)
         except TelldusError as e:
-            if e.error == TELLSTICK_ERROR_METHOD_NOT_SUPPORTED:
+            if e.error == const.TELLSTICK_ERROR_METHOD_NOT_SUPPORTED:
                 raise AttributeError(name)
             raise
 
@@ -354,6 +354,6 @@ class Controller(object):
         try:
             self.lib.tdSetControllerValue(self.id, name, value)
         except TelldusError as e:
-            if e.error == TELLSTICK_ERROR_SYNTAX:
+            if e.error == const.TELLSTICK_ERROR_SYNTAX:
                 raise AttributeError(name)
             raise

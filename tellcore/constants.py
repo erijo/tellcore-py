@@ -21,10 +21,10 @@ Contains all constants used in the API.
 All the TELLSTICK_* defines documented in the `Telldus Core documentation
 <http://developer.telldus.com/doxygen/group__core.html>`_ are available here.
 
-The recommended usage is to simply do::
-    from tellcore.constants import *
+The recommended usage is to do::
+    import tellcore.constants as const
 
-The constants will then be available as TELLSTICK_TURNON, etc.
+The constants will then be available as const.TELLSTICK_TURNON, etc.
 """
 
 # Device methods
