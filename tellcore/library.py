@@ -20,6 +20,8 @@ from ctypes import byref, cast, create_string_buffer, POINTER, sizeof
 import platform
 import threading
 
+import tellcore.constants as const
+
 
 if platform.system() == 'Windows':
     from ctypes import WINFUNCTYPE as FUNCTYPE, windll as DllLoader
@@ -264,7 +266,7 @@ class Library(object):
 
         def check_bool_result(result, func, args):
             if not result:
-                raise TelldusError(-3)
+                raise TelldusError(const.TELLSTICK_ERROR_DEVICE_NOT_FOUND)
             return result
 
         def free_string(result, func, args):
