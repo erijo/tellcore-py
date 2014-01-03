@@ -1,5 +1,5 @@
 # Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3 of the
@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_ulong, c_void_p
+from ctypes import c_bool, c_char_p, c_int, c_ubyte, c_void_p
 from ctypes import byref, cast, create_string_buffer, POINTER, sizeof
 import platform
 import threading
@@ -127,7 +127,7 @@ class Library(object):
                 if type(param) is unicode:
                     return cls(param)
             except NameError:
-                pass # The unicode type does not exist in python 3
+                pass  # The unicode type does not exist in python 3
             return c_char_p.from_param(param)
 
     # Must be a separate class (i.e. not part of Library), to avoid circular
