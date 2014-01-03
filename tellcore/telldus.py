@@ -26,6 +26,16 @@ from tellcore.library import Library, TelldusError, BaseCallbackDispatcher
 
 
 class QueuedCallbackDispatcher(BaseCallbackDispatcher):
+    """The default callback dispatcher used by :class:`TelldusCore`.
+
+    Queues callbacks that arrive from Telldus Core. Then calls them in the main
+    thread (or more precise: the thread calling :func:`process_callback`)
+    instead of the callback thread use by Telldus Core. This way the
+    application using :class:`TelldusCore` don't have to do any thread
+    syncronization. Only make sure
+    :func:`TelldusCore.process_pending_callbacks` is called regulary.
+    """
+
     def __init__(self):
         super(QueuedCallbackDispatcher, self).__init__()
         self._queue = queue.Queue()
@@ -34,6 +44,11 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
         self._queue.put((callback, args))
 
     def process_callback(self, block):
+        """Process one queued callback.
+
+        :param boolean block: If True, blocks waiting for a callback to come.
+        :return: True if a callback was processed; otherwise False.
+        """
         try:
             (callback, args) = self._queue.get(block=block)
             try:
@@ -46,9 +61,28 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
 
 
 class TelldusCore(object):
+    """The main class for tellcore-py.
+
+    Has methods for adding devices and for enumerating controllers, devices and
+    sensors. Also handles callbacks; both registration and making sure the
+    callbacks are processed in the main thread instead of the callback thread.
+    """
+
     _callback_dispatcher = None
 
     def __init__(self, library_path=None, callback_dispatcher=None):
+        """Create a new TelldusCore instance.
+
+        Only one instance should be used per program.
+
+        :param str library_path: Passed to the :class:`.library.Library`
+            constructor if not None.
+
+        :param str callback_dispatcher: An instance implementing the
+            :class:`.library.BaseCallbackDispatcher` interface. If None, an
+            instance of :class:`QueuedCallbackDispatcher` is used. A custom
+            dispatcher can be used to integrate callbacks in an event loop.
+        """
         super(TelldusCore, self).__init__()
 
         if library_path is not None:
@@ -69,21 +103,56 @@ class TelldusCore(object):
             self.lib.set_callback_dispatcher(TelldusCore._callback_dispatcher)
 
     def register_device_event(self, callback):
+        """Register a new device event callback handler.
+
+        See :ref:`event-example` for more information.
+
+        :return: the callback id
+        """
         return self.lib.tdRegisterDeviceEvent(callback)
 
     def register_device_change_event(self, callback):
+        """Register a new device change event callback handler.
+
+        See :ref:`event-example` for more information.
+
+        :return: the callback id
+        """
         return self.lib.tdRegisterDeviceChangeEvent(callback)
 
     def register_raw_device_event(self, callback):
+        """Register a new raw device event callback handler.
+
+        See :ref:`event-example` for more information.
+
+        :return: the callback id
+        """
         return self.lib.tdRegisterRawDeviceEvent(callback)
 
     def register_sensor_event(self, callback):
+        """Register a new sensor event callback handler.
+
+        See :ref:`event-example` for more information.
+
+        :return: the callback id
+        """
         return self.lib.tdRegisterSensorEvent(callback)
 
     def register_controller_event(self, callback):
+        """Register a new controller event callback handler.
+
+        See :ref:`event-example` for more information.
+
+        :return: the callback id
+        """
         return self.lib.tdRegisterControllerEvent(callback)
 
     def unregister_callback(self, id):
+        """Unregister a callback handler.
+
+        :param int id: the callback id as returned from one of the
+            register_*_event methods.
+        """
         self.lib.tdUnregisterCallback(id)
 
     def process_callback(self, block=True):
@@ -305,9 +374,19 @@ class Sensor(object):
         self.lib = Library() if lib is None else lib
 
     def has_value(self, datatype):
+        """Return True if the sensor supports the given data type.
+
+        sensor.has_value(TELLSTICK_TEMPERATURE) is identical to calling
+        sensor.has_temperature().
+        """
         return (self.datatypes & datatype) != 0
 
     def value(self, datatype):
+        """Return the :class:`SensorValue' for the given datatype.
+
+        sensor.value(TELLSTICK_TEMPERATURE) is identical to calling
+        sensor.temperature().
+        """
         value = self.lib.tdSensorValue(
             self.protocol, self.model, self.id, datatype)
         return SensorValue(datatype, value['value'], value['timestamp'])

@@ -12,6 +12,7 @@ Contents:
    telldus
    constants
    library
+   event_example
 
 Indices and tables
 ==================
@@ -19,4 +20,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
