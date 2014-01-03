@@ -1,5 +1,5 @@
 # Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3 of the
@@ -93,11 +93,13 @@ class Test(unittest.TestCase):
     def test_string_releaser(self):
         """Test that all strings returned from core lib are released"""
         released = []
+
         def tdReleaseString(pointer):
             released.append(pointer.value)
         self.mocklib.tdReleaseString = tdReleaseString
 
         returned = []
+
         def tdGetErrorString(error):
             string = ctypes.c_char_p(
                 ("error %d" % error).encode(Library.STRING_ENCODING))
@@ -153,6 +155,7 @@ class Test(unittest.TestCase):
 
     def test_unicode(self):
         test_name = b'\xc3\xa5\xc3\xa4\xc3\xb6'
+
         def tdSetName(id, name):
             self.assertIs(type(name), bytes)
             self.assertEqual(name, test_name)
@@ -184,7 +187,8 @@ class Test(unittest.TestCase):
         unregistered_ids = []
         self.setup_callback(registered_ids, unregistered_ids)
 
-        def callback(*args): pass
+        def callback(*args):
+            pass
 
         lib = Library()
         lib.tdRegisterDeviceEvent(callback)
@@ -205,7 +209,8 @@ class Test(unittest.TestCase):
         unregistered_ids = []
         self.setup_callback(registered_ids, unregistered_ids)
 
-        def callback(*args): pass
+        def callback(*args):
+            pass
 
         lib = Library()
         id_ = lib.tdRegisterDeviceEvent(callback)

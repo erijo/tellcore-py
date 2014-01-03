@@ -1,5 +1,5 @@
 # Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3 of the
@@ -21,7 +21,7 @@ from tellcore.telldus import TelldusCore, TelldusError, Device
 from tellcore.constants import *
 import tellcore.library
 
-from ctypes import c_char_p, c_int, create_string_buffer
+from ctypes import c_char_p, c_int
 import gc
 import mocklib
 
@@ -41,6 +41,7 @@ class Test(unittest.TestCase):
 
     def event_tester(self, core, registrator, trigger, trigger_args):
         event_args = {}
+
         def callback(*args):
             # Strip away callback id
             event_args[args[-1]] = args[:-1]
@@ -83,7 +84,7 @@ class Test(unittest.TestCase):
         self.event_tester(core, core.register_raw_device_event,
                           self.mockdispatcher.trigger_raw_device_event,
                           (c_char_p(b"bar"), c_int(6)))
-        
+
     def test_sensor_event(self):
         core = TelldusCore()
         self.event_tester(core, core.register_sensor_event,
@@ -140,6 +141,7 @@ class Test(unittest.TestCase):
 
     def test_sensors(self):
         self.sensor_index = 0
+
         def tdSensor(protocol, p_len, model, m_len, id, datatypes):
             sensors = [{'protocol': b"proto_1", 'model': b"model_1", 'id': 1,
                         'datatypes': TELLSTICK_TEMPERATURE},
@@ -182,7 +184,7 @@ class Test(unittest.TestCase):
             else:
                 return TELLSTICK_ERROR_METHOD_NOT_SUPPORTED
         self.mocklib.tdSensorValue = tdSensorValue
-        
+
         core = TelldusCore()
         sensors = core.sensors()
 

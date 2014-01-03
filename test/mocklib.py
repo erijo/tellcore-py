@@ -1,5 +1,5 @@
 # Copyright (c) 2012-2013 Erik Johansson <erik@ejohansson.se>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3 of the
@@ -27,6 +27,7 @@ import tellcore.library
 
 ByRefArgType = type(ctypes.byref(ctypes.c_int(0)))
 
+
 class MockLibLoader(object):
     def __init__(self, mocklib):
         object.__init__(self)
@@ -36,6 +37,7 @@ class MockLibLoader(object):
     def LoadLibrary(self, name):
         self.load_count += 1
         return self.mocklib
+
 
 class MockTelldusCoreLib(object):
     def __init__(self):
@@ -60,6 +62,7 @@ class MockTelldusCoreLib(object):
             func.implementation = value
         else:
             object.__setattr__(self, name, value)
+
 
 class MockCFunction(object):
     def __init__(self, name, lib):
@@ -110,6 +113,7 @@ class MockCFunction(object):
             res = self.errcheck(res, self, args)
         return res
 
+
 class MockEventDispatcher(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, name="MockEventDispatcher")
@@ -153,8 +157,8 @@ class MockEventDispatcher(threading.Thread):
         }
 
         for name, id_list in callback_types.items():
-            func = lambda callback, context, id_list=id_list: register_callback(
-                id_list, callback, context)
+            func = lambda callback, context, id_list=id_list: \
+                register_callback(id_list, callback, context)
             setattr(mocklib, name, func)
 
     def run(self):
@@ -169,6 +173,7 @@ class MockEventDispatcher(threading.Thread):
 
     def stop(self):
         assert self.running
+
         def stop_thread():
             self.running = False
         self.queue_event(stop_thread)
