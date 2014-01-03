@@ -5,67 +5,72 @@ import sys
 import time
 
 import tellcore.telldus as td
-from tellcore.constants import *
+import tellcore.constants as const
 
-METHODS = {TELLSTICK_TURNON: 'turn on',
-           TELLSTICK_TURNOFF: 'turn off',
-           TELLSTICK_BELL: 'bell',
-           TELLSTICK_TOGGLE: 'toggle',
-           TELLSTICK_DIM: 'dim',
-           TELLSTICK_LEARN: 'learn',
-           TELLSTICK_EXECUTE: 'execute',
-           TELLSTICK_UP: 'up',
-           TELLSTICK_DOWN: 'down',
-           TELLSTICK_STOP: 'stop'}
+METHODS = {const.TELLSTICK_TURNON: 'turn on',
+           const.TELLSTICK_TURNOFF: 'turn off',
+           const.TELLSTICK_BELL: 'bell',
+           const.TELLSTICK_TOGGLE: 'toggle',
+           const.TELLSTICK_DIM: 'dim',
+           const.TELLSTICK_LEARN: 'learn',
+           const.TELLSTICK_EXECUTE: 'execute',
+           const.TELLSTICK_UP: 'up',
+           const.TELLSTICK_DOWN: 'down',
+           const.TELLSTICK_STOP: 'stop'}
 
-EVENTS = {TELLSTICK_DEVICE_ADDED: "added",
-          TELLSTICK_DEVICE_REMOVED: "removed",
-          TELLSTICK_DEVICE_CHANGED: "changed",
-          TELLSTICK_DEVICE_STATE_CHANGED: "state changed"}
+EVENTS = {const.TELLSTICK_DEVICE_ADDED: "added",
+          const.TELLSTICK_DEVICE_REMOVED: "removed",
+          const.TELLSTICK_DEVICE_CHANGED: "changed",
+          const.TELLSTICK_DEVICE_STATE_CHANGED: "state changed"}
 
-CHANGES = {TELLSTICK_CHANGE_NAME: "name",
-           TELLSTICK_CHANGE_PROTOCOL: "protocol",
-           TELLSTICK_CHANGE_MODEL: "model",
-           TELLSTICK_CHANGE_METHOD: "method",
-           TELLSTICK_CHANGE_AVAILABLE: "available",
-           TELLSTICK_CHANGE_FIRMWARE: "firmware"}
+CHANGES = {const.TELLSTICK_CHANGE_NAME: "name",
+           const.TELLSTICK_CHANGE_PROTOCOL: "protocol",
+           const.TELLSTICK_CHANGE_MODEL: "model",
+           const.TELLSTICK_CHANGE_METHOD: "method",
+           const.TELLSTICK_CHANGE_AVAILABLE: "available",
+           const.TELLSTICK_CHANGE_FIRMWARE: "firmware"}
 
-TYPES = {TELLSTICK_CONTROLLER_TELLSTICK: 'tellstick',
-         TELLSTICK_CONTROLLER_TELLSTICK_DUO: "tellstick duo",
-         TELLSTICK_CONTROLLER_TELLSTICK_NET: "tellstick net"}
+TYPES = {const.TELLSTICK_CONTROLLER_TELLSTICK: 'tellstick',
+         const.TELLSTICK_CONTROLLER_TELLSTICK_DUO: "tellstick duo",
+         const.TELLSTICK_CONTROLLER_TELLSTICK_NET: "tellstick net"}
+
 
 def device_event(id_, method, data, cid):
     method_string = METHODS.get(method, "UNKNOWN STATE {0}".format(method))
     string = "[DEVICE] {0} -> {1}".format(id_, method_string)
-    if method == TELLSTICK_DIM:
+    if method == const.TELLSTICK_DIM:
         string += " [{0}]".format(data)
     print(string)
+
 
 def device_change_event(id_, event, type_, cid):
     event_string = EVENTS.get(event, "UNKNOWN EVENT {0}".format(event))
     string = "[DEVICE_CHANGE] {0} {1}".format(event_string, id_)
-    if event == TELLSTICK_DEVICE_CHANGED:
+    if event == const.TELLSTICK_DEVICE_CHANGED:
         type_string = CHANGES.get(type_, "UNKNOWN CHANGE {0}".format(type_))
         string += " [{0}]".format(type_string)
     print(string)
 
+
 def raw_event(data, controller_id, cid):
     string = "[RAW] {0} <- {1}".format(controller_id, data)
     print(string)
+
 
 def sensor_event(protocol, model, id_, dataType, value, timestamp, cid):
     string = "[SENSOR] {0} [{1}/{2}] ({3}) @ {4} <- {5}".format(
         id_, protocol, model, dataType, timestamp, value)
     print(string)
 
+
 def controller_event(id_, event, type_, new_value, cid):
     event_string = EVENTS.get(event, "UNKNOWN EVENT {0}".format(event))
     string = "[CONTROLLER] {0} {1}".format(event_string, id_)
-    if event == TELLSTICK_DEVICE_ADDED:
+    if event == const.TELLSTICK_DEVICE_ADDED:
         type_string = TYPES.get(type_, "UNKNOWN TYPE {0}".format(type_))
         string += " {0}".format(type_string)
-    elif (event == TELLSTICK_DEVICE_CHANGED
-          or event == TELLSTICK_DEVICE_STATE_CHANGED):
+    elif (event == const.TELLSTICK_DEVICE_CHANGED
+          or event == const.TELLSTICK_DEVICE_STATE_CHANGED):
         type_string = CHANGES.get(type_, "UNKNOWN CHANGE {0}".format(type_))
         string += " [{0}] -> {1}".format(type_string, new_value)
     print(string)
@@ -102,7 +107,7 @@ for arg in args:
                 core.register_device_change_event(device_change_event))
         elif arg == 'raw':
             callbacks.append(core.register_raw_device_event(raw_event))
-        elif arg == 'sensor': 
+        elif arg == 'sensor':
             callbacks.append(core.register_sensor_event(sensor_event))
         elif arg == 'controller':
             callbacks.append(core.register_controller_event(controller_event))

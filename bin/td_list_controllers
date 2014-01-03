@@ -3,7 +3,7 @@
 import sys
 
 import tellcore.telldus as td
-from tellcore.constants import *
+import tellcore.constants as const
 
 core = td.TelldusCore()
 
@@ -14,9 +14,9 @@ except Exception as e:
     print(e)
     sys.exit(1)
 
-TYPES = {TELLSTICK_CONTROLLER_TELLSTICK: 'TellStick',
-         TELLSTICK_CONTROLLER_TELLSTICK_DUO: "TellStick Duo",
-         TELLSTICK_CONTROLLER_TELLSTICK_NET: "TellStick Net"}
+TYPES = {const.TELLSTICK_CONTROLLER_TELLSTICK: 'TellStick',
+         const.TELLSTICK_CONTROLLER_TELLSTICK_DUO: "TellStick Duo",
+         const.TELLSTICK_CONTROLLER_TELLSTICK_NET: "TellStick Net"}
 
 for controller in controllers:
     try:
