@@ -24,9 +24,11 @@ All the TELLSTICK_* defines documented in the `Telldus Core documentation
 The recommended usage is to do::
     import tellcore.constants as const
 
-The constants will then be available as const.TELLSTICK_TURNON, etc.
+The constants will then be available as const.TELLSTICK_TURNON, etc. See below
+for the full list of all available constants.
 """
 
+# Tellstick constants
 # Device methods
 TELLSTICK_TURNON = 1
 TELLSTICK_TURNOFF = 2
