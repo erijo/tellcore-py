@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+# Copyright (c) 2014 Erik Johansson <erik@ejohansson.se>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+# USA
+
+import argparse
+import time
+
+import tellcore.telldus as td
+import tellcore.constants as const
+
+def print_devices(devices):
+    print("Number of devices: {}".format(len(devices)))
+    for device in devices:
+        cmd = device.last_sent_command(
+            const.TELLSTICK_TURNON
+            | const.TELLSTICK_TURNOFF
+            | const.TELLSTICK_DIM)
+        if cmd == const.TELLSTICK_TURNON:
+            cmd_str = "ON"
+        elif cmd == const.TELLSTICK_TURNOFF:
+            cmd_str = "OFF"
+        elif cmd == const.TELLSTICK_DIM:
+            cmd_str = "DIMMED:{}".format(device.last_sent_value())
+        else:
+            cmd_str = "UNKNOWN:{}".format(cmd)
+        print("{:<5d} {:<15s} {}".format(device.id, device.name, cmd_str))
+
+def print_sensors(sensors):
+    print("Number of sensors: {}".format(len(sensors)))
+    print("{:<15s} {:<15s} {:<5s} {:<8s} {:<8s} {:<18s} {:<20s} {}".format(
+            "PROTOCOL", "MODEL", "ID", "TEMP", "HUMIDITY", "RAIN", "WIND",
+            "LAST UPDATED"))
+
+    def format_value(sensor, datatype, formatter):
+        if not sensor.has_value(datatype):
+            return ("", None)
+        value = sensor.value(datatype)
+        return (formatter(value.value), value.timestamp)
+
+    for sensor in sensors:
+        values = []
+        values.append(format_value(sensor, const.TELLSTICK_TEMPERATURE,
+                                   lambda x: "{} C".format(x)))
+        values.append(format_value(sensor, const.TELLSTICK_HUMIDITY,
+                                   lambda x: "{} %".format(x)))
+        values.append(format_value(sensor, const.TELLSTICK_RAINRATE,
+                                   lambda x: x + " mm/h "))
+        values.append(format_value(sensor, const.TELLSTICK_RAINTOTAL,
+                                   lambda x: x + " mm"))
+        values.append(format_value(sensor, const.TELLSTICK_WINDDIRECTION,
+                                   lambda x: ["N", "NNE", "NE", "ENE",
+                                              "E", "ESE", "SE", "SSE",
+                                              "S", "SSW", "SW", "WSW",
+                                              "W", "WNW", "NW", "NNW"]
+                                   [int(float(x) / 22.5)] + " "))
+        values.append(format_value(sensor, const.TELLSTICK_WINDAVERAGE,
+                                   lambda x: x + " m/s "))
+        values.append(format_value(sensor, const.TELLSTICK_WINDGUST,
+                                   lambda x: "({} m/s)".format(x)))
+
+        # Get first valid timestamp
+        timestamp = [v[1] for v in values if v[1] is not None][0]
+
+        s = [v[0] for v in values]
+        values_str = "{:<8s} {:<8s} ".format(s[0], s[1])
+        values_str += "{:<18s} ".format(s[2] + s[3])
+        values_str += "{:<20s} ".format(s[4] + s[5] + s[6])
+
+        print("{:<15s} {:<15s} {:<5d} {}{}".format(
+                sensor.protocol, sensor.model, sensor.id, values_str,
+                time.strftime("%F %T", time.localtime(timestamp))))
+
+def find_device(device, devices):
+    for d in devices:
+        if str(d.id) == device or d.name == device:
+            return d
+    print("Device '{}' not found".format(device))
+    return None
+
+parser = argparse.ArgumentParser(
+    description='Telldus administration tool',
+    epilog='DEVICE can be either device id or name')
+group = parser.add_mutually_exclusive_group(required=True)
+
+group.add_argument(
+    '-l', '--list', action='store_true',
+    help='List all configured devices and discovered sensors')
+group.add_argument(
+    '--on', metavar='DEVICE', help='Turn on device')
+group.add_argument(
+    '--off', metavar='DEVICE', help='Turn off device')
+
+args = vars(parser.parse_args())
+
+core = td.TelldusCore()
+
+if args['list']:
+    print_devices(core.devices())
+    print("")
+    print_sensors(core.sensors())
+elif args['on'] is not None:
+    device = find_device(args['on'], core.devices())
+    if device is not None:
+        device.turn_on()
+elif args['off'] is not None:
+    device = find_device(args['off'], core.devices())
+    if device is not None:
+        device.turn_off()
