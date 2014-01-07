@@ -10,6 +10,11 @@ TelldusCore
 
    .. automethod:: __init__
 
+   .. attribute:: callback_dispatcher
+
+      The callback dispatcher used. Set when constructing the instance and
+      should not be changed.
+
 Device
 ------
 .. autoclass:: Device

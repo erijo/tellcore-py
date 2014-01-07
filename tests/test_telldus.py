@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
         core.unregister_callback(id2)
 
         trigger(*trigger_args)
-        core.process_pending_callbacks()
+        core.callback_dispatcher.process_pending_callbacks()
 
         callback_args = []
         for arg in trigger_args:

@@ -140,7 +140,7 @@ if len(callbacks) == 0:
 
 try:
     while True:
-        core.process_pending_callbacks()
+        core.callback_dispatcher.process_pending_callbacks()
         time.sleep(0.5)
 except KeyboardInterrupt:
     pass

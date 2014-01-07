@@ -30,10 +30,10 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
 
     Queues callbacks that arrive from Telldus Core. Then calls them in the main
     thread (or more precise: the thread calling :func:`process_callback`)
-    instead of the callback thread use by Telldus Core. This way the
+    instead of the callback thread used by Telldus Core. This way the
     application using :class:`TelldusCore` don't have to do any thread
-    syncronization. Only make sure
-    :func:`TelldusCore.process_pending_callbacks` is called regulary.
+    syncronization. Only make sure :func:`process_pending_callbacks` is called
+    regulary.
     """
 
     def __init__(self):
@@ -43,8 +43,8 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
     def on_callback(self, callback, *args):
         self._queue.put((callback, args))
 
-    def process_callback(self, block):
-        """Process one queued callback.
+    def process_callback(self, block=True):
+        """Dispatch a single callback in the current thread.
 
         :param boolean block: If True, blocks waiting for a callback to come.
         :return: True if a callback was processed; otherwise False.
@@ -59,6 +59,11 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
             return False
         return True
 
+    def process_pending_callbacks(self):
+        """Dispatch all pending callbacks in the current thread."""
+        while self.process_callback(block=False):
+            pass
+
 
 class TelldusCore(object):
     """The main class for tellcore-py.
@@ -68,7 +73,7 @@ class TelldusCore(object):
     callbacks are processed in the main thread instead of the callback thread.
     """
 
-    _callback_dispatcher = None
+    callback_dispatcher = None
 
     def __init__(self, library_path=None, callback_dispatcher=None):
         """Create a new TelldusCore instance.
@@ -92,15 +97,15 @@ class TelldusCore(object):
 
         do_set_dispatcher = True
         if callback_dispatcher is not None:
-            assert TelldusCore._callback_dispatcher is None
-            TelldusCore._callback_dispatcher = callback_dispatcher
-        elif TelldusCore._callback_dispatcher is None:
-            TelldusCore._callback_dispatcher = QueuedCallbackDispatcher()
+            assert TelldusCore.callback_dispatcher is None
+            TelldusCore.callback_dispatcher = callback_dispatcher
+        elif TelldusCore.callback_dispatcher is None:
+            TelldusCore.callback_dispatcher = QueuedCallbackDispatcher()
         else:
             do_set_dispatcher = False
 
         if do_set_dispatcher:
-            self.lib.set_callback_dispatcher(TelldusCore._callback_dispatcher)
+            self.lib.set_callback_dispatcher(TelldusCore.callback_dispatcher)
 
     def register_device_event(self, callback):
         """Register a new device event callback handler.
@@ -154,15 +159,6 @@ class TelldusCore(object):
             register_*_event methods.
         """
         self.lib.tdUnregisterCallback(id)
-
-    def process_callback(self, block=True):
-        """Dispatch a single callback in the current thread."""
-        return TelldusCore._callback_dispatcher.process_callback(block=block)
-
-    def process_pending_callbacks(self):
-        """Dispatch all pending callbacks in the current thread."""
-        while self.process_callback(block=False):
-            pass
 
     def devices(self):
         """Return all known devices.

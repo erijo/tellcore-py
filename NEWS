@@ -7,6 +7,11 @@ Release date: <tbd>
 
 * More complete documentation.
 
+* Removed the methods process_callback and process_pending_callbacks from
+  :class:`telldus.TelldusCore`. Instead, callback_dispatcher is now a public
+  attribute of :class:`telldus.TelldusCore` and the default callback dispatcher
+  :class:`telldus.QueuedCallbackDispatcher` implements the two methods instead.
+
 
 tellcore-py 0.9.0
 ------------------
