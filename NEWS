@@ -1,5 +1,5 @@
 tellcore-py 0.9.0
-==================
+------------------
 Release date: 2014-01-03
 
 * Telldus functions that used to return bool (tdSetName, tdSetProtocol,
@@ -8,18 +8,18 @@ Release date: 2014-01-03
 
 * Support for rain- and windsensors.
 
-* Include data type in SensorValue.
+* Include data type in :class:`telldus.SensorValue`.
 
 
 tellcore-py 0.8.0
-==================
+------------------
 Release date: 2013-08-11
 
 * Improved callback handling to simplify integration with different event
   loops. Parameter conversion is now done in the library code and the
   adaptation to different event loops is done by a simple callback dispatch
-  class. The default dispatcher (when using TelldusCore) is still done using a
-  queue.
+  class. The default dispatcher (when using :class:`telldus.TelldusCore`) is
+  still done using a queue.
 
 * New documentation for parts of the package. Can be read online at
   https://tellcore-py.readthedocs.org/.
@@ -28,7 +28,7 @@ Release date: 2013-08-11
 
 
 tellcore-py 0.1.0
-=================
+-----------------
 Release date: 2013-06-26
 
 * First release.
