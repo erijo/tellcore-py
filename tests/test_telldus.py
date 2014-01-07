@@ -37,7 +37,28 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         self.mockdispatcher.stop()
+        del self.mockdispatcher
+
+        tellcore.library.DllLoader = None
+        del self.loader
+        del self.mocklib
+
         gc.collect()
+
+        # If a test case fails and throws an exception, the TelldusCore
+        # instance will remain in the frame included in the exception which
+        # will stop the library from being unloaded. This means that the next
+        # test case will reuse the same library instance which causes it to
+        # fail.
+        if tellcore.library.Library._lib:
+            tellcore.library.Library._lib = None
+            tellcore.library.Library._refcount = 0
+
+    def decode_string(self, string):
+        return string.decode(tellcore.library.Library.STRING_ENCODING)
+
+    def encode_string(self, string):
+        return string.encode(tellcore.library.Library.STRING_ENCODING)
 
     def event_tester(self, core, registrator, trigger, trigger_args):
         event_args = {}
@@ -59,8 +80,7 @@ class Test(unittest.TestCase):
         callback_args = []
         for arg in trigger_args:
             if type(arg.value) is bytes:
-                callback_args.append(arg.value.decode(
-                        tellcore.library.Library.STRING_ENCODING))
+                callback_args.append(self.decode_string(arg.value))
             else:
                 callback_args.append(arg.value)
         callback_args = tuple(callback_args)
@@ -178,8 +198,7 @@ class Test(unittest.TestCase):
 
         def tdSensorValue(protocol, model, id, datatype, value, v_len, times):
             if datatype == 1 << (id - 1):
-                value.value = ("%d" % (id * 100 + datatype)).encode(
-                    tellcore.library.Library.STRING_ENCODING)
+                value.value = self.encode_string("%d" % (id * 100 + datatype))
                 return TELLSTICK_SUCCESS
             else:
                 return TELLSTICK_ERROR_METHOD_NOT_SUPPORTED
