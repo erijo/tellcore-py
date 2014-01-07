@@ -12,6 +12,7 @@ Contents:
    telldus
    constants
    library
+   tdtool_example
    event_example
 
 Indices and tables
