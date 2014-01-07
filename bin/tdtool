@@ -23,7 +23,9 @@ import tellcore.telldus as td
 import tellcore.constants as const
 
 def print_devices(devices):
-    print("Number of devices: {}".format(len(devices)))
+    print("Number of devices: {}\n".format(len(devices)))
+    print("{:<5s} {:<15s} {:<10s} {:<10s} {:<20s} {}".format(
+            "ID", "NAME", "STATE", "PROTOCOL", "MODEL", "PARAMETERS"))
     for device in devices:
         cmd = device.last_sent_command(
             const.TELLSTICK_TURNON
@@ -37,10 +39,15 @@ def print_devices(devices):
             cmd_str = "DIMMED:{}".format(device.last_sent_value())
         else:
             cmd_str = "UNKNOWN:{}".format(cmd)
-        print("{:<5d} {:<15s} {}".format(device.id, device.name, cmd_str))
+        params_str = ""
+        for name, value in device.parameters().iteritems():
+            params_str += "{}:{} ".format(name, value)
+        print("{:<5d} {:<15s} {:<10s} {:<10s} {:<20s} {}".format(
+                device.id, device.name, cmd_str,
+                device.protocol, device.model, params_str))
 
 def print_sensors(sensors):
-    print("Number of sensors: {}".format(len(sensors)))
+    print("Number of sensors: {}\n".format(len(sensors)))
     print("{:<15s} {:<15s} {:<5s} {:<8s} {:<8s} {:<18s} {:<20s} {}".format(
             "PROTOCOL", "MODEL", "ID", "TEMP", "HUMIDITY", "RAIN", "WIND",
             "LAST UPDATED"))
@@ -100,9 +107,17 @@ group.add_argument(
     '-l', '--list', action='store_true',
     help='List all configured devices and discovered sensors')
 group.add_argument(
+    '--list-devices', action='store_true',
+    help='List all configured devices')
+group.add_argument(
+    '--list-sensors', action='store_true',
+    help='List all discovered sensors')
+group.add_argument(
     '--on', metavar='DEVICE', help='Turn on device')
 group.add_argument(
     '--off', metavar='DEVICE', help='Turn off device')
+group.add_argument(
+    '--remove', metavar='DEVICE', help='Remove device')
 
 args = vars(parser.parse_args())
 
@@ -112,6 +127,10 @@ if args['list']:
     print_devices(core.devices())
     print("")
     print_sensors(core.sensors())
+elif args['list_devices']:
+    print_devices(core.devices())
+elif args['list_sensors']:
+    print_sensors(core.sensors())
 elif args['on'] is not None:
     device = find_device(args['on'], core.devices())
     if device is not None:
@@ -120,3 +139,7 @@ elif args['off'] is not None:
     device = find_device(args['off'], core.devices())
     if device is not None:
         device.turn_off()
+elif args['remove'] is not None:
+    device = find_device(args['remove'], core.devices())
+    if device is not None:
+        device.remove()
