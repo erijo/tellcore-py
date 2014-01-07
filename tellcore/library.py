@@ -111,7 +111,7 @@ class Library(object):
     The class takes care of:
        * freeing memory for strings returned from the C API,
        * converting an error return from a function into an exception
-         (TelldusError),
+         (:class:`TelldusError`),
        * converts to and from Python strings <=> C style strings.
     """
 
