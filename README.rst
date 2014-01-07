@@ -73,9 +73,3 @@ library class. This class is used for e.g. adding new devices, or enumerating
 the existing devices, sensors and/or controllers. E.g. calling the devices()
 method returns a list of Device instances. The Device class in turn has methods
 for turning the device on, off, etc.
-
-TODO
-----
-
-* Improve documentation.
-* Add high level support for device groups.

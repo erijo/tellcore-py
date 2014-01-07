@@ -32,6 +32,11 @@ Device
       The device type (read only). One of the device type constants from
       :mod:`tellcore.constants`.
 
+DeviceGroup
+-----------
+.. autoclass:: DeviceGroup
+   :members:
+
 Sensor
 ------
 .. autoclass:: Sensor

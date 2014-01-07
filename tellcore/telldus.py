@@ -167,12 +167,12 @@ class TelldusCore(object):
     def devices(self):
         """Return all known devices.
 
-        :return: list of :class:`Device` instances.
+        :return: list of :class:`Device` or :class:`DeviceGroup` instances.
         """
         devices = []
         count = self.lib.tdGetNumberOfDevices()
         for i in range(count):
-            device = Device(self.lib.tdGetDeviceId(i), lib=self.lib)
+            device = Device.create(self.lib.tdGetDeviceId(i), lib=self.lib)
             devices.append(device)
         return devices
 
@@ -211,7 +211,10 @@ class TelldusCore(object):
         return controllers
 
     def add_device(self, name, protocol, model=None, **parameters):
-        """Add a new device to Telldus Core."""
+        """Add a new device.
+
+        :return: a :class:`Device` or :class:`DeviceGroup` instance.
+        """
         device = Device(self.lib.tdAddDevice(), lib=self.lib)
         try:
             device.name = name
@@ -220,6 +223,10 @@ class TelldusCore(object):
                 device.model = model
             for key, value in parameters.items():
                 device.set_parameter(key, value)
+
+            # Type check must be after protocol has been set
+            if device.type == const.TELLSTICK_TYPE_GROUP:
+                device = DeviceGroup(device.id, lib=self.lib)
             return device
         except Exception:
             import sys
@@ -233,6 +240,15 @@ class TelldusCore(object):
                 raise exc_info[0].with_traceback(exc_info[1], exc_info[2])
             else:
                 exec("raise exc_info[0], exc_info[1], exc_info[2]")
+
+    def add_group(self, name, devices):
+        """Add a new device group.
+
+        :return: a :class:`DeviceGroup` instance.
+        """
+        device = self.add_device(name, "group")
+        device.add_to_group(devices)
+        return device
 
     def send_raw_command(self, command, reserved=0):
         return self.lib.tdSendRawCommand(command, reserved)
@@ -253,6 +269,17 @@ class Device(object):
 
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
+
+    @staticmethod
+    def create(id, lib=None):
+        device = Device(id, lib=lib)
+        try:
+            if device.type == TELLSTICK_TYPE_GROUP:
+                return DeviceGroup(id, lib=lib)
+        except:
+            pass
+
+        return device
 
     def __init__(self, id, lib=None):
         super(Device, self).__init__()
@@ -354,6 +381,54 @@ class Device(object):
 
     def last_sent_value(self):
         return self.lib.tdLastSentValue(self.id)
+
+
+class DeviceGroup(Device):
+    """Extends :class:`Device` with methods for managing a group
+
+    E.g. when a group is turned on, all devices in that group are turned on.
+    """
+
+    def add_to_group(self, devices):
+        """Add device(s) to the group."""
+        ids = {d.id for d in self.devices_in_group()}
+        ids.update(self._device_ids(devices))
+        self._set_group(ids)
+
+    def remove_from_group(self, devices):
+        """Remove device(s) from the group."""
+        ids = {d.id for d in self.devices_in_group()}
+        ids.difference_update(self._device_ids(devices))
+        self._set_group(ids)
+
+    def devices_in_group(self):
+        """Fetch list of devices in group."""
+        try:
+            devices = self.get_parameter('devices')
+        except AttributeError:
+            return []
+
+        ctor = Device.create
+        return [ctor(int(x), lib=self.lib) for x in devices.split(',') if x]
+
+    @staticmethod
+    def _device_ids(devices):
+        try:
+            iter(devices)
+        except TypeError:
+            devices = [devices]
+
+        ids = set()
+        for device in devices:
+            try:
+                ids.add(device.id)
+            except AttributeError:
+                # Assume device is id
+                ids.add(int(device))
+        return ids
+
+    def _set_group(self, ids):
+        self.set_parameter('devices', ','.join([str(x) for x in ids]))
 
 
 class Sensor(object):

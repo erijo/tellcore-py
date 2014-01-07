@@ -14,6 +14,7 @@ Contents:
    library
    tdtool_example
    event_example
+   news
 
 Indices and tables
 ==================

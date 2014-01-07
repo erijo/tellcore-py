@@ -1,3 +1,13 @@
+tellcore-py <tbd>
+-----------------
+Release date: <tbd>
+
+* Added high level support for device groups in the form of the new class
+  :class:`telldus.DeviceGroup`.
+
+* More complete documentation.
+
+
 tellcore-py 0.9.0
 ------------------
 Release date: 2014-01-03

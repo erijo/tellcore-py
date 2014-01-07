@@ -118,6 +118,60 @@ class Test(unittest.TestCase):
                           self.mockdispatcher.trigger_controller_event,
                           (c_int(10), c_int(11), c_int(12), c_char_p(b"new")))
 
+    def test_group(self):
+        self.mocklib.tdAddDevice = lambda: 1
+        self.mocklib.tdGetDeviceType = lambda id: TELLSTICK_TYPE_GROUP
+
+        device = {}
+        device['parameters'] = {}
+
+        def tdSetName(id, name):
+            device['name'] = self.decode_string(name)
+            return id == 1
+        self.mocklib.tdSetName = tdSetName
+
+        def tdSetProtocol(id, protocol):
+            device['protocol'] = self.decode_string(protocol)
+            return id == 1
+        self.mocklib.tdSetProtocol = tdSetProtocol
+
+        def tdSetDeviceParameter(id, name, value):
+            name = self.decode_string(name)
+            if value:
+                device['parameters'][name] = self.decode_string(value)
+            elif name in device['parameters']:
+                del device['parameters'][name]
+            return id == 1
+        self.mocklib.tdSetDeviceParameter = tdSetDeviceParameter
+
+        def tdGetDeviceParameter(id, name, default):
+            name = self.decode_string(name)
+            try:
+                return c_char_p(self.encode_string(device['parameters'][name]))
+            except KeyError:
+                return c_char_p(default)
+        self.mocklib.tdGetDeviceParameter = tdGetDeviceParameter
+
+        core = TelldusCore()
+        dev = core.add_group("test", [1, Device(2), 3, 4])
+
+        self.assertEqual("test", device['name'])
+        self.assertEqual("group", device['protocol'])
+        self.assertDictEqual({'devices': '1,2,3,4'}, device['parameters'])
+
+        dev.add_to_group(5)
+        self.assertDictEqual({'devices': '1,2,3,4,5'}, device['parameters'])
+
+        dev.remove_from_group([3, 2, 6, Device(2), Device(1)])
+        self.assertDictEqual({'devices': '4,5'}, device['parameters'])
+        self.assertListEqual([4, 5], [d.id for d in dev.devices_in_group()])
+
+        dev.remove_from_group(4)
+        self.assertDictEqual({'devices': '5'}, device['parameters'])
+
+        dev.remove_from_group([5])
+        self.assertDictEqual({}, device['parameters'])
+
     def test_devices(self):
         devs = {0: {'protocol': b"proto_1", 'model': b"model_1"},
                 3: {'protocol': b"proto_2", 'model': b"model_2"},
@@ -125,6 +179,7 @@ class Test(unittest.TestCase):
 
         self.mocklib.tdGetNumberOfDevices = lambda: len(devs)
         self.mocklib.tdGetDeviceId = lambda index: index * 3
+        self.mocklib.tdGetDeviceType = lambda id: TELLSTICK_TYPE_DEVICE
         self.mocklib.tdGetProtocol = lambda id: \
             c_char_p(devs[id]['protocol'])
         self.mocklib.tdGetModel = lambda id: \
