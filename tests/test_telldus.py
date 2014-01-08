@@ -276,19 +276,19 @@ class Test(unittest.TestCase):
                           TELLSTICK_WINDGUST],
                          [s.datatypes for s in sensors])
 
-        self.assertEqual([False]*0 + [True] + [False]*6,
+        self.assertEqual([False] * 0 + [True] + [False] * 6,
                          [s.has_temperature() for s in sensors])
-        self.assertEqual([False]*1 + [True] + [False]*5,
+        self.assertEqual([False] * 1 + [True] + [False] * 5,
                          [s.has_humidity() for s in sensors])
-        self.assertEqual([False]*2 + [True] + [False]*4,
+        self.assertEqual([False] * 2 + [True] + [False] * 4,
                          [s.has_rainrate() for s in sensors])
-        self.assertEqual([False]*3 + [True] + [False]*3,
+        self.assertEqual([False] * 3 + [True] + [False] * 3,
                          [s.has_raintotal() for s in sensors])
-        self.assertEqual([False]*4 + [True] + [False]*2,
+        self.assertEqual([False] * 4 + [True] + [False] * 2,
                          [s.has_winddirection() for s in sensors])
-        self.assertEqual([False]*5 + [True] + [False]*1,
+        self.assertEqual([False] * 5 + [True] + [False] * 1,
                          [s.has_windaverage() for s in sensors])
-        self.assertEqual([False]*6 + [True] + [False]*0,
+        self.assertEqual([False] * 6 + [True] + [False] * 0,
                          [s.has_windgust() for s in sensors])
 
         self.assertEqual("%d" % (100 + TELLSTICK_TEMPERATURE),

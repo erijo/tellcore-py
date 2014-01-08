@@ -199,15 +199,15 @@ class Library(object):
         'tdGetErrorString': [c_char_p, [c_int]],
 
         'tdRegisterDeviceEvent':
-            [c_int, [DEVICE_EVENT_FUNC, c_void_p]],
+        [c_int, [DEVICE_EVENT_FUNC, c_void_p]],
         'tdRegisterDeviceChangeEvent':
-            [c_int, [DEVICE_CHANGE_EVENT_FUNC, c_void_p]],
+        [c_int, [DEVICE_CHANGE_EVENT_FUNC, c_void_p]],
         'tdRegisterRawDeviceEvent':
-            [c_int, [RAW_DEVICE_EVENT_FUNC, c_void_p]],
+        [c_int, [RAW_DEVICE_EVENT_FUNC, c_void_p]],
         'tdRegisterSensorEvent':
-            [c_int, [SENSOR_EVENT_FUNC, c_void_p]],
+        [c_int, [SENSOR_EVENT_FUNC, c_void_p]],
         'tdRegisterControllerEvent':
-            [c_int, [CONTROLLER_EVENT_FUNC, c_void_p]],
+        [c_int, [CONTROLLER_EVENT_FUNC, c_void_p]],
         'tdUnregisterCallback': [c_int, [c_int]],
 
         'tdTurnOn': [c_int, [c_int]],

@@ -68,6 +68,7 @@ class Test(unittest.TestCase):
 
         lib = Library()
         self.assertEqual(self.loader.load_count, 2)
+        self.assertIsInstance(lib, Library)
 
     def test_initialized(self):
         self.assertFalse(self.initialized)
