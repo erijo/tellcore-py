@@ -245,12 +245,15 @@ class TelldusCore(object):
         return device
 
     def send_raw_command(self, command, reserved=0):
+        """Send a raw command."""
         return self.lib.tdSendRawCommand(command, reserved)
 
     def connect_controller(self, vid, pid, serial):
+        """Connect a controller."""
         self.lib.tdConnectTellStickController(vid, pid, serial)
 
     def disconnect_controller(self, vid, pid, serial):
+        """Disconnect a controller."""
         self.lib.tdDisconnectTellStickController(vid, pid, serial)
 
 
@@ -268,7 +271,8 @@ def DeviceFactory(id, lib=None):
 class Device(object):
     """A device that can be controlled by Telldus Core.
 
-    Can be instantiated directly if the id is known. Otherwise returned from
+    Can be instantiated directly if the id is known, but using
+    :func:`DeviceFactory` is recommended. Otherwise returned from
     :func:`TelldusCore.add_device` or :func:`TelldusCore.devices`.
     """
 
@@ -311,6 +315,7 @@ class Device(object):
         func(self.id, value)
 
     def parameters(self):
+        """Get dict with all set parameters."""
         parameters = {}
         for name in self.PARAMETERS:
             try:
@@ -320,6 +325,7 @@ class Device(object):
         return parameters
 
     def get_parameter(self, name):
+        """Get a parameter."""
         default_value = "$%!)(INVALID)(!%$"
         value = self.lib.tdGetDeviceParameter(self.id, name, default_value)
         if value == default_value:
@@ -327,6 +333,7 @@ class Device(object):
         return value
 
     def set_parameter(self, name, value):
+        """Set a parameter."""
         self.lib.tdSetDeviceParameter(self.id, name, str(value))
 
     def turn_on(self):
@@ -365,15 +372,19 @@ class Device(object):
         self.lib.tdStop(self.id)
 
     def learn(self):
+        """Send "learn" command to the device."""
         self.lib.tdLearn(self.id)
 
     def methods(self, methods_supported):
+        """Query the device for supported methods."""
         return self.lib.tdMethods(self.id, methods_supported)
 
     def last_sent_command(self, methods_supported):
+        """Get the last sent (or seen) command."""
         return self.lib.tdLastSentCommand(self.id, methods_supported)
 
     def last_sent_value(self):
+        """Get the last sent (or seen) value."""
         return self.lib.tdLastSentValue(self.id)
 
 
@@ -426,6 +437,11 @@ class DeviceGroup(Device):
 
 
 class Sensor(object):
+    """Represents a sensor.
+
+    Returned from :func:`TelldusCore.sensors`
+    """
+
     DATATYPES = {"temperature": const.TELLSTICK_TEMPERATURE,
                  "humidity": const.TELLSTICK_HUMIDITY,
                  "rainrate": const.TELLSTICK_RAINRATE,
@@ -451,7 +467,7 @@ class Sensor(object):
         return (self.datatypes & datatype) != 0
 
     def value(self, datatype):
-        """Return the :class:`SensorValue' for the given datatype.
+        """Return the :class:`SensorValue` for the given datatype.
 
         sensor.value(TELLSTICK_TEMPERATURE) is identical to calling
         sensor.temperature().
@@ -472,6 +488,11 @@ class Sensor(object):
 
 
 class SensorValue(object):
+    """Represents a single sensor value.
+
+    Returned from :func:`Sensor.value`.
+    """
+
     __slots__ = ["datatype", "value", "timestamp"]
 
     def __init__(self, datatype, value, timestamp):
@@ -482,6 +503,11 @@ class SensorValue(object):
 
 
 class Controller(object):
+    """Represents a Telldus controller.
+
+    Returned from :func:`TelldusCore.controllers`
+    """
+
     def __init__(self, id, type, lib=None):
         lib = lib or Library()
 
