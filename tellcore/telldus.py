@@ -90,16 +90,16 @@ class TelldusCore(object):
         """
         super(TelldusCore, self).__init__()
 
-        if library_path is not None:
+        if library_path:
             self.lib = Library(library_path)
         else:
             self.lib = Library()
 
         do_set_dispatcher = True
-        if callback_dispatcher is not None:
+        if callback_dispatcher:
             assert TelldusCore.callback_dispatcher is None
             TelldusCore.callback_dispatcher = callback_dispatcher
-        elif TelldusCore.callback_dispatcher is None:
+        elif not TelldusCore.callback_dispatcher:
             TelldusCore.callback_dispatcher = QueuedCallbackDispatcher()
         else:
             do_set_dispatcher = False
@@ -215,7 +215,7 @@ class TelldusCore(object):
         try:
             device.name = name
             device.protocol = protocol
-            if model is not None:
+            if model:
                 device.model = model
             for key, value in parameters.items():
                 device.set_parameter(key, value)
@@ -278,7 +278,7 @@ class Device(object):
     def __init__(self, id, lib=None):
         super(Device, self).__init__()
 
-        lib = Library() if lib is None else lib
+        lib = lib or Library()
         super(Device, self).__setattr__('id', id)
         super(Device, self).__setattr__('lib', lib)
 
@@ -440,7 +440,7 @@ class Sensor(object):
         self.model = model
         self.id = id
         self.datatypes = datatypes
-        self.lib = Library() if lib is None else lib
+        self.lib = lib or Library()
 
     def has_value(self, datatype):
         """Return True if the sensor supports the given data type.
@@ -483,7 +483,7 @@ class SensorValue(object):
 
 class Controller(object):
     def __init__(self, id, type, lib=None):
-        lib = Library() if lib is None else lib
+        lib = lib or Library()
 
         super(Controller, self).__init__()
         super(Controller, self).__setattr__('id', id)

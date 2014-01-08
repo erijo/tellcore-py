@@ -60,7 +60,7 @@ class TelldusError(Exception):
     def __init__(self, error, lib=None):
         super(TelldusError, self).__init__()
         self.error = error
-        self.lib = Library() if lib is None else lib
+        self.lib = lib or Library()
 
     def __str__(self):
         """Return the human readable error string."""
@@ -306,7 +306,7 @@ class Library(object):
         """
         super(Library, self).__init__()
 
-        if Library._lib is None:
+        if not Library._lib:
             assert Library._refcount == 0
 
             lib = DllLoader.LoadLibrary(name)
@@ -323,7 +323,7 @@ class Library(object):
         library instance.
         """
         # Happens if the LoadLibrary call fails
-        if Library._lib is None:
+        if not Library._lib:
             assert Library._refcount == 0
             return
 
