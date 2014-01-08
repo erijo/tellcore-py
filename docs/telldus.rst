@@ -15,6 +15,10 @@ TelldusCore
       The callback dispatcher used. Set when constructing the instance and
       should not be changed.
 
+DeviceFactory
+-------------
+.. autofunction:: DeviceFactory
+
 Device
 ------
 .. autoclass:: Device

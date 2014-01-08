@@ -168,7 +168,7 @@ class TelldusCore(object):
         devices = []
         count = self.lib.tdGetNumberOfDevices()
         for i in range(count):
-            device = Device.create(self.lib.tdGetDeviceId(i), lib=self.lib)
+            device = DeviceFactory(self.lib.tdGetDeviceId(i), lib=self.lib)
             devices.append(device)
         return devices
 
@@ -220,10 +220,8 @@ class TelldusCore(object):
             for key, value in parameters.items():
                 device.set_parameter(key, value)
 
-            # Type check must be after protocol has been set
-            if device.type == const.TELLSTICK_TYPE_GROUP:
-                device = DeviceGroup(device.id, lib=self.lib)
-            return device
+            # Return correct type
+            return DeviceFactory(device.id, lib=self.lib)
         except Exception:
             import sys
             exc_info = sys.exc_info()
@@ -256,6 +254,17 @@ class TelldusCore(object):
         self.lib.tdDisconnectTellStickController(vid, pid, serial)
 
 
+def DeviceFactory(id, lib=None):
+    """Create the correct device instance based on device type and return it.
+
+    :return: a :class:`Device` or :class:`DeviceGroup` instance.
+    """
+    lib = lib or Library()
+    if lib.tdGetDeviceType(id) == const.TELLSTICK_TYPE_GROUP:
+        return DeviceGroup(id, lib=lib)
+    return Device(id, lib=lib)
+
+
 class Device(object):
     """A device that can be controlled by Telldus Core.
 
@@ -265,17 +274,6 @@ class Device(object):
 
     PARAMETERS = ["devices", "house", "unit", "code", "system", "units",
                   "fade"]
-
-    @staticmethod
-    def create(id, lib=None):
-        device = Device(id, lib=lib)
-        try:
-            if device.type == const.TELLSTICK_TYPE_GROUP:
-                return DeviceGroup(id, lib=lib)
-        except:
-            pass
-
-        return device
 
     def __init__(self, id, lib=None):
         super(Device, self).__init__()
@@ -404,7 +402,7 @@ class DeviceGroup(Device):
         except AttributeError:
             return []
 
-        ctor = Device.create
+        ctor = DeviceFactory
         return [ctor(int(x), lib=self.lib) for x in devices.split(',') if x]
 
     @staticmethod
