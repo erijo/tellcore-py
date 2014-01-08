@@ -17,7 +17,7 @@
 
 import unittest
 
-from tellcore.telldus import TelldusCore, TelldusError, Device
+from tellcore.telldus import TelldusCore, TelldusError, Device, DeviceGroup
 from tellcore.constants import *
 import tellcore.library
 
@@ -168,6 +168,7 @@ class Test(unittest.TestCase):
 
         dev.remove_from_group(4)
         self.assertDictEqual({'devices': '5'}, device['parameters'])
+        self.assertIsInstance(dev.devices_in_group()[0], DeviceGroup)
 
         dev.remove_from_group([5])
         self.assertDictEqual({}, device['parameters'])

@@ -270,7 +270,7 @@ class Device(object):
     def create(id, lib=None):
         device = Device(id, lib=lib)
         try:
-            if device.type == TELLSTICK_TYPE_GROUP:
+            if device.type == const.TELLSTICK_TYPE_GROUP:
                 return DeviceGroup(id, lib=lib)
         except:
             pass
