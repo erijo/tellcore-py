@@ -28,7 +28,7 @@ if platform.system() == 'Windows':
     LIBRARY_NAME = 'TelldusCore.dll'
 else:
     from ctypes import CFUNCTYPE as FUNCTYPE, cdll as DllLoader
-    if platform.system() != 'Darwin':
+    if platform.system() == 'Darwin':
         from ctypes.util import find_library
         LIBRARY_NAME = find_library('TelldusCore') or \
             '/Library/Frameworks/TelldusCore.framework/TelldusCore'
