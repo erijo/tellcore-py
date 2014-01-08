@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         lib2 = Library()
         self.assertEqual(self.loader.load_count, 1)
 
-        lib1 = lib2 = None
+        del lib1, lib2
         gc.collect()
 
         lib = Library()
@@ -76,11 +76,11 @@ class Test(unittest.TestCase):
         lib2 = Library()
         self.assertTrue(self.initialized)
 
-        lib1 = None
+        del lib1
         gc.collect()
         self.assertTrue(self.initialized)
 
-        lib2 = None
+        del lib2
         gc.collect()
         self.assertFalse(self.initialized)
 
