@@ -32,8 +32,8 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
     thread (or more precise: the thread calling :func:`process_callback`)
     instead of the callback thread used by Telldus Core. This way the
     application using :class:`TelldusCore` don't have to do any thread
-    syncronization. Only make sure :func:`process_pending_callbacks` is called
-    regulary.
+    synchronization. Only make sure :func:`process_pending_callbacks` is called
+    regularly.
     """
 
     def __init__(self):
@@ -71,6 +71,11 @@ class TelldusCore(object):
     Has methods for adding devices and for enumerating controllers, devices and
     sensors. Also handles callbacks; both registration and making sure the
     callbacks are processed in the main thread instead of the callback thread.
+
+    Since most functions are Python-ified wrappers around the C API, please
+    also refer to the `Telldus Core documentation
+    <http://developer.telldus.com/doxygen/group__core.html>`_) for further
+    information.
     """
 
     callback_dispatcher = None
@@ -467,7 +472,7 @@ class Sensor(object):
         return (self.datatypes & datatype) != 0
 
     def value(self, datatype):
-        """Return the :class:`SensorValue` for the given datatype.
+        """Return the :class:`SensorValue` for the given data type.
 
         sensor.value(TELLSTICK_TEMPERATURE) is identical to calling
         sensor.temperature().
