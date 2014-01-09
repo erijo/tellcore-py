@@ -1,6 +1,7 @@
 Making a release
 ----------------
 
+1. Make sure 'make tests' passes.
 1. Update version in setup.py and docs/conf.py (three places in total).
 1. Update NEWS with changes, version number and date.
 1. Commit all changes and tag (git tag -s -m 'tellcore-py version x.y.z')
