@@ -1,3 +1,5 @@
+.. _tdtool-example:
+
 tdtool (example)
 ================
 

@@ -110,11 +110,11 @@ class Library(object):
     return value are mostly the same as for the C API, except for functions
     with multiple out parameters.
 
-    The class takes care of:
-       * freeing memory for strings returned from the C API,
-       * converting an error return from a function into an exception
-         (:class:`TelldusError`),
-       * converts to and from Python strings <=> C style strings.
+    In addition, this class:
+       * automatically frees memory for strings returned from the C API,
+       * converts errors returned from functions into
+         (:class:`TelldusError`) exceptions,
+       * transparently converts between Python strings and C style strings.
     """
 
     STRING_ENCODING = 'utf-8'

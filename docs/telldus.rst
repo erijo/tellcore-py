@@ -3,6 +3,24 @@ tellcore.telldus (module)
 
 .. automodule:: tellcore.telldus
 
+This module provides a high level Python interface to Telldus' C API.
+
+Since most functions are Python-ified wrappers around the C API, please also
+refer to the `Telldus Core documentation
+<http://developer.telldus.com/doxygen/group__core.html>`_ for further
+information.
+
+The classes in this module all use the :class:`.library.Library` class under
+the hood, and thus also has e.g. automatic memory manangement, exceptions
+(:exc:`.library.TelldusError`) and transparent string conversion with full
+Python 3 support.
+
+Some example programs are included in the documentation to help understand how
+to use the different classes:
+
+* :ref:`tdtool-example`
+* :ref:`event-example`
+
 TelldusCore
 -----------
 .. autoclass:: TelldusCore
