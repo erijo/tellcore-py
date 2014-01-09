@@ -5,6 +5,7 @@ Making a release
 1. Update version in setup.py and docs/conf.py (three places in total).
 1. Update NEWS with changes, version number and date.
 1. Commit all changes and tag (git tag -s -m 'tellcore-py version x.y.z')
+1. Push new tag (git push --tags)
 1. Push new version to Python Package Index: ./setup.py sdist upload
 1. Make new documenation version visible online:
    https://readthedocs.org/dashboard/tellcore-py/versions/
