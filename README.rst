@@ -39,7 +39,9 @@ Users
 -----
 
 * `Tellprox <https://github.com/p3tecracknell/tellprox/>`_ - A local server to
-  use in place of Tellstick Live
+  use in place of Telldus Live
+* `tellive-py <https://github.com/erijo/tellive-py>`_ - A Python wrapper for
+  Telldus Live
 
 Example
 -------
