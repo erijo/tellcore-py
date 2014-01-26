@@ -18,7 +18,6 @@
 
 import argparse
 import sys
-import time
 
 import tellcore.telldus as td
 import tellcore.constants as const
@@ -109,7 +108,15 @@ parser.add_argument(
 
 args = vars(parser.parse_args())
 
-core = td.TelldusCore()
+try:
+    import asyncio
+    loop = asyncio.get_event_loop()
+    dispatcher = td.AsyncioCallbackDispatcher(loop)
+    core = td.TelldusCore(callback_dispatcher=dispatcher)
+except ImportError:
+    loop = None
+    core = td.TelldusCore()
+
 callbacks = []
 
 for arg in args:
@@ -139,8 +146,12 @@ if len(callbacks) == 0:
     sys.exit(1)
 
 try:
-    while True:
-        core.callback_dispatcher.process_pending_callbacks()
-        time.sleep(0.5)
+    if loop:
+        loop.run_forever()
+    else:
+        import time
+        while True:
+            core.callback_dispatcher.process_pending_callbacks()
+            time.sleep(0.5)
 except KeyboardInterrupt:
     pass

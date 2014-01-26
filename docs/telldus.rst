@@ -101,3 +101,8 @@ QueuedCallbackDispatcher
 ------------------------
 .. autoclass:: QueuedCallbackDispatcher
    :members:
+
+AsyncioCallbackDispatcher
+-------------------------
+.. autoclass:: AsyncioCallbackDispatcher
+   :members:

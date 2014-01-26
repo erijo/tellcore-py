@@ -65,6 +65,21 @@ class QueuedCallbackDispatcher(BaseCallbackDispatcher):
             pass
 
 
+class AsyncioCallbackDispatcher(BaseCallbackDispatcher):
+    """Dispatcher for use with the event loop available in Python 3.4+.
+
+    Callbacks will be dispatched on the thread running the event loop. The loop
+    argument should be a BaseEventLoop instance, e.g. the one returned from
+    asyncio.get_event_loop().
+    """
+    def __init__(self, loop):
+        super(AsyncioCallbackDispatcher, self).__init__()
+        self._loop = loop
+
+    def on_callback(self, callback, *args):
+        self._loop.call_soon_threadsafe(callback, *args)
+
+
 class TelldusCore(object):
     """The main class for tellcore-py.
 
