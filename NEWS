@@ -5,6 +5,8 @@ Release date: TBD
 * Added :class:`telldus.AsyncioCallbackDispatcher` class for integrating
   callbacks with the new event loop available in Python 3.4 (asyncio).
 
+* Include tools from bin/ when installing.
+
 
 tellcore-py 1.0.0
 -----------------
@@ -22,7 +24,7 @@ Release date: 2014-01-09
 
 
 tellcore-py 0.9.0
-------------------
+-----------------
 Release date: 2014-01-03
 
 * Telldus functions that used to return bool (tdSetName, tdSetProtocol,
@@ -35,7 +37,7 @@ Release date: 2014-01-03
 
 
 tellcore-py 0.8.0
-------------------
+-----------------
 Release date: 2013-08-11
 
 * Improved callback handling to simplify integration with different event
