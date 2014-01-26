@@ -35,6 +35,19 @@ Requirements
 * Python
 * `Telldus Core library <http://telldus.com/products/nativesoftware>`_
 
+Installation
+------------
+
+* Easiest is to install the package from `Python Package Index
+  <https://pypi.python.org/pypi/tellcore-py>`_ by running: pip install
+  tellcore-py
+
+* Can also be installed by cloning the `GIP repository
+  <https://github.com/erijo/tellcore-py>`_ or downloading the `ZIP archive
+  <https://github.com/erijo/tellcore-py/archive/master.zip>`_ from GitHub and
+  unpacking it. Then change directory to tellcore-py and run =python setup.py
+  install=.
+
 Users
 -----
 
