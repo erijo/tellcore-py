@@ -1,6 +1,6 @@
-tellcore-py TBD
----------------
-Release date: TBD
+tellcore-py 1.0.1
+-----------------
+Release date: 2014-01-26
 
 * Added :class:`telldus.AsyncioCallbackDispatcher` class for integrating
   callbacks with the new event loop available in Python 3.4 (asyncio).
