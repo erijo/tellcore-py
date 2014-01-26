@@ -12,7 +12,7 @@ Contents:
    telldus
    constants
    library
-   tdtool_example
+   tool_example
    event_example
    news
 

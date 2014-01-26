@@ -18,7 +18,7 @@ Python 3 support.
 Some example programs are included in the documentation to help understand how
 to use the different classes:
 
-* :ref:`tdtool-example`
+* :ref:`tool-example`
 * :ref:`event-example`
 
 TelldusCore

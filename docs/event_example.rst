@@ -12,4 +12,4 @@ refere to the official `Telldus Core documentation
 typedefs). Please note that the context mentioned there is not included in
 tellcore-py.
 
-.. literalinclude:: ../bin/td_event_tracer
+.. literalinclude:: ../bin/tellcore_events
