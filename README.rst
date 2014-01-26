@@ -45,8 +45,8 @@ Installation
 * Can also be installed by cloning the `GIP repository
   <https://github.com/erijo/tellcore-py>`_ or downloading the `ZIP archive
   <https://github.com/erijo/tellcore-py/archive/master.zip>`_ from GitHub and
-  unpacking it. Then change directory to tellcore-py and run =python setup.py
-  install=.
+  unpacking it. Then change directory to tellcore-py and run python setup.py
+  install.
 
 Users
 -----
