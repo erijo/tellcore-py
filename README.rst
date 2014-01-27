@@ -74,6 +74,12 @@ all devices off. ::
 More examples can be found in the `bin
 <https://github.com/erijo/tellcore-py/tree/master/bin>`_ directory.
 
+Changelog
+---------
+
+See `changelog section
+<https://tellcore-py.readthedocs.org/en/latest/news.html>`_ in documentation.
+
 Internals
 ---------
 
