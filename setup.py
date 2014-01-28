@@ -8,6 +8,7 @@ setup(
     author='Erik Johansson',
     author_email='erik@ejohansson.se',
     packages=['tellcore'],
+    provides=['tellcore'],
     scripts=['bin/tellcore_tool', 'bin/tellcore_events',
              'bin/tellcore_controllers'],
     url='https://github.com/erijo/tellcore-py',
