@@ -1,6 +1,8 @@
-tellcore-py 1.0.1
------------------
-Release date: 2014-01-26
+Changelog
+=========
+
+1.0.1 (2014-01-26)
+------------------
 
 * Added :class:`telldus.AsyncioCallbackDispatcher` class for integrating
   callbacks with the new event loop available in Python 3.4 (asyncio).
@@ -8,9 +10,8 @@ Release date: 2014-01-26
 * Include tools from bin/ when installing.
 
 
-tellcore-py 1.0.0
------------------
-Release date: 2014-01-09
+1.0.0 (2014-01-09)
+------------------
 
 * Added high level support for device groups in the form of the new class
   :class:`telldus.DeviceGroup`.
@@ -23,9 +24,8 @@ Release date: 2014-01-09
   :class:`telldus.QueuedCallbackDispatcher` implements the two methods instead.
 
 
-tellcore-py 0.9.0
------------------
-Release date: 2014-01-03
+0.9.0 (2014-01-03)
+------------------
 
 * Telldus functions that used to return bool (tdSetName, tdSetProtocol,
   tdSetModel, tdSetDeviceParameter and tdRemoveDevice) now raise an exception
@@ -36,9 +36,8 @@ Release date: 2014-01-03
 * Include data type in :class:`telldus.SensorValue`.
 
 
-tellcore-py 0.8.0
------------------
-Release date: 2013-08-11
+0.8.0 (2013-08-11)
+------------------
 
 * Improved callback handling to simplify integration with different event
   loops. Parameter conversion is now done in the library code and the
@@ -52,8 +51,7 @@ Release date: 2013-08-11
 * Fix problem with strings and python 3 (issue #2).
 
 
-tellcore-py 0.1.0
------------------
-Release date: 2013-06-26
+0.1.0 (2013-06-26)
+------------------
 
 * First release.

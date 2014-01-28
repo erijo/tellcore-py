@@ -1,6 +1,3 @@
-Changelog
-=========
-
 .. py:currentmodule:: tellcore
 
-.. include:: ../NEWS
+.. include:: ../CHANGES.rst
