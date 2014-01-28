@@ -32,7 +32,7 @@ Features
 Requirements
 ------------
 
-* Python
+* Python 2.7, 3.2+ or pypy
 * `Telldus Core library <http://telldus.com/products/nativesoftware>`_
 
 Installation
@@ -40,7 +40,7 @@ Installation
 
 .. code-block:: bash
 
-    % pip install tellcore-py
+    $ pip install tellcore-py
 
 Can also be installed by cloning the `GIP repository
 <https://github.com/erijo/tellcore-py>`_ or downloading the `ZIP archive
@@ -49,7 +49,7 @@ unpacking it. Then change directory to tellcore-py and run:
 
 .. code-block:: bash
 
-    % python setup.py install
+    $ python setup.py install
 
 Users
 -----
@@ -63,7 +63,9 @@ Example
 -------
 
 A simple example for adding a new "lamp" device, turning it on and then turning
-all devices off. ::
+all devices off.
+
+.. code-block:: python
 
     from tellcore.telldus import TelldusCore
 
