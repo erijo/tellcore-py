@@ -1,10 +1,24 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import os
+import re
+
+version_re = re.compile(r'__version__ = "(.*)"')
+cwd = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(cwd, 'tellcore', '__init__.py')) as init:
+    for line in init:
+        match = version_re.search(line)
+        if match:
+            version = match.group(1)
+            break
+    else:
+        raise Exception('Cannot find version in __init__.py')
 
 setup(
     name='tellcore-py',
-    version='1.0.1',
+    version=version,
     author='Erik Johansson',
     author_email='erik@ejohansson.se',
     packages=['tellcore'],
