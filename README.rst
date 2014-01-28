@@ -1,6 +1,12 @@
 Python wrapper for Telldus Core
 ===============================
 
+.. image:: https://badge.fury.io/py/tellcore-py.png
+    :target: https://pypi.python.org/pypi/tellcore-py/
+
+.. image:: https://secure.travis-ci.org/erijo/tellcore-py.png?branch=master
+    :target: http://travis-ci.org/erijo/tellcore-py
+
 tellcore-py is a Python wrapper for `Telldus' <http://www.telldus.com/>`_ home
 automation library `Telldus Core <http://developer.telldus.se/doxygen/>`_.
 
