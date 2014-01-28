@@ -7,4 +7,4 @@ python:
 
 install: pip install .
 
-script: pytest
+script: python run_tests
