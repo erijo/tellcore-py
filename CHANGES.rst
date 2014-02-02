@@ -1,6 +1,13 @@
 Changelog
 =========
 
+NEXT (TBD)
+----------
+
+* Work around crash in Telldus Core (< v2.1.2) when re-initalizing the library
+  after tdClose.
+
+
 1.0.2 (2014-01-28)
 ------------------
 

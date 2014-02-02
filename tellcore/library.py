@@ -339,7 +339,11 @@ class Library(object):
             except:
                 pass
 
-        Library._lib.tdClose()
+        # telldus-core before v2.1.2 (where tdController was added) does not
+        # handle re-initialization after tdClose has been called (see Telldus
+        # ticket 188).
+        if hasattr(Library._lib, "tdController"):
+            Library._lib.tdClose()
         Library._lib = None
 
     def set_callback_dispatcher(self, dispatcher):
