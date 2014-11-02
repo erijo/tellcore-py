@@ -117,6 +117,8 @@ group.add_argument(
 group.add_argument(
     '--off', metavar='DEVICE', help='Turn off device')
 group.add_argument(
+    '--learn', metavar='DEVICE', help='Send learn command to device')
+group.add_argument(
     '--remove', metavar='DEVICE', help='Remove device')
 
 args = vars(parser.parse_args())
@@ -139,6 +141,10 @@ elif args['off'] is not None:
     device = find_device(args['off'], core.devices())
     if device is not None:
         device.turn_off()
+elif args['learn'] is not None:
+    device = find_device(args['learn'], core.devices())
+    if device is not None:
+        device.learn()
 elif args['remove'] is not None:
     device = find_device(args['remove'], core.devices())
     if device is not None:
