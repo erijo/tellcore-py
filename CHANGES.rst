@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Working
+-------
+
+* Made ``last_sent_value`` return an int instead of string.
+
+
 1.0.3 (2014-02-02)
 ------------------
 

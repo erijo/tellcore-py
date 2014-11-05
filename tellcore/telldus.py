@@ -400,7 +400,10 @@ class Device(object):
 
     def last_sent_value(self):
         """Get the last sent (or seen) value."""
-        return self.lib.tdLastSentValue(self.id)
+        try:
+            return int(self.lib.tdLastSentValue(self.id))
+        except ValueError:
+            return None
 
 
 class DeviceGroup(Device):
