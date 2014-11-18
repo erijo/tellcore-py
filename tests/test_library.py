@@ -191,7 +191,8 @@ class Test(unittest.TestCase):
         def callback(*args):
             pass
 
-        lib = Library()
+        dispatcher = tellcore.library.DirectCallbackDispatcher
+        lib = Library(callback_dispatcher=dispatcher)
         lib.tdRegisterDeviceEvent(callback)
         lib.tdRegisterDeviceChangeEvent(callback)
         lib.tdRegisterRawDeviceEvent(callback)
@@ -205,7 +206,7 @@ class Test(unittest.TestCase):
         gc.collect()
         self.assertEqual(registered_ids, unregistered_ids)
 
-    def test_callback_shared(self):
+    def test_callback_not_shared(self):
         registered_ids = []
         unregistered_ids = []
         self.setup_callback(registered_ids, unregistered_ids)
@@ -213,17 +214,26 @@ class Test(unittest.TestCase):
         def callback(*args):
             pass
 
-        lib = Library()
-        id_ = lib.tdRegisterDeviceEvent(callback)
-        self.assertEqual(len(registered_ids), 1)
-        self.assertEqual(len(unregistered_ids), 0)
+        dispatcher = tellcore.library.DirectCallbackDispatcher
+        lib = Library(callback_dispatcher=dispatcher)
 
-        lib_copy = Library()
+        cid = lib.tdRegisterDeviceEvent(callback)
+        self.assertEqual(registered_ids, [cid])
+        self.assertEqual(unregistered_ids, [])
+
+        lib_copy = Library(callback_dispatcher=dispatcher)
+
+        cid_copy = lib_copy.tdRegisterDeviceEvent(callback)
+        self.assertEqual(registered_ids, [cid, cid_copy])
+        self.assertEqual(unregistered_ids, [])
+
         lib = None
+        gc.collect()
+        self.assertEqual(unregistered_ids, [cid])
 
-        self.assertEqual(len(unregistered_ids), 0)
-        lib_copy.tdUnregisterCallback(id_)
-        self.assertEqual(len(unregistered_ids), 1)
+        lib_copy = None
+        gc.collect()
+        self.assertEqual(registered_ids, unregistered_ids)
 
     def test_exception_on_error(self):
         def tdGetNumberOfDevices():

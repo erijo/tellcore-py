@@ -88,39 +88,24 @@ class TelldusCore(object):
     callbacks are processed in the main thread instead of the callback thread.
     """
 
-    callback_dispatcher = None
-
     def __init__(self, library_path=None, callback_dispatcher=None):
         """Create a new TelldusCore instance.
 
         Only one instance should be used per program.
 
         :param str library_path: Passed to the :class:`.library.Library`
-            constructor if not None.
+            constructor.
 
         :param str callback_dispatcher: An instance implementing the
-            :class:`.library.BaseCallbackDispatcher` interface. If None, an
-            instance of :class:`QueuedCallbackDispatcher` is used. A custom
-            dispatcher can be used to integrate callbacks in an event loop.
+            :class:`.library.BaseCallbackDispatcher` interface (
+            e.g. :class:`QueuedCallbackDispatcher` or
+            :class:`AsyncioCallbackDispatcher`) A callback dispatcher must be
+            provided if callbacks are to be used.
+
         """
         super(TelldusCore, self).__init__()
-
-        if library_path:
-            self.lib = Library(library_path)
-        else:
-            self.lib = Library()
-
-        do_set_dispatcher = True
-        if callback_dispatcher:
-            assert TelldusCore.callback_dispatcher is None
-            TelldusCore.callback_dispatcher = callback_dispatcher
-        elif not TelldusCore.callback_dispatcher:
-            TelldusCore.callback_dispatcher = QueuedCallbackDispatcher()
-        else:
-            do_set_dispatcher = False
-
-        if do_set_dispatcher:
-            self.lib.set_callback_dispatcher(TelldusCore.callback_dispatcher)
+        self.callback_dispatcher = callback_dispatcher
+        self.lib = Library(library_path, callback_dispatcher)
 
     def register_device_event(self, callback):
         """Register a new device event callback handler.

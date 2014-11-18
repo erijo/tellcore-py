@@ -112,11 +112,11 @@ try:
     import asyncio
     loop = asyncio.get_event_loop()
     dispatcher = td.AsyncioCallbackDispatcher(loop)
-    core = td.TelldusCore(callback_dispatcher=dispatcher)
 except ImportError:
     loop = None
-    core = td.TelldusCore()
+    dispatcher = td.QueuedCallbackDispatcher()
 
+core = td.TelldusCore(callback_dispatcher=dispatcher)
 callbacks = []
 
 for arg in args:

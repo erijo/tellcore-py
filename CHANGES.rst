@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.1.0 (TBD)
+-----------
+
+* The callback dispatcher is no longer global, but tied to a ``Library``
+  instance. Applications wishing to use callbacks must now pass an explicit
+  dispatcher instance to the ``TelldusCore`` constructor.
+
+
 1.0.4 (2014-11-05)
 ------------------
 

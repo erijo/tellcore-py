@@ -8,10 +8,10 @@ support classes for the higher level API described in :doc:`telldus`.
 
 Library
 -------
-.. autoclass:: Library(name=LIBRARY_NAME)
+.. autoclass:: Library(name=None, callback_dispatcher=None)
    :members:
 
-   .. automethod:: __init__(name=LIBRARY_NAME)
+   .. automethod:: __init__(name=None, callback_dispatcher=None)
 
    .. automethod:: __del__
 

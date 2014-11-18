@@ -87,13 +87,8 @@ class BaseCallbackDispatcher(object):
 class DirectCallbackDispatcher(BaseCallbackDispatcher):
     """Dispatches callbacks directly.
 
-    This is the default callback dispatcher when using the Library class
-    directly. Since the callback is dispatched directly, the callback is called
-    in the callback thread.
-
-    The recommended way is to use the :class:`tellcore.telldus.TelldusCore`
-    class instead, in which case the default dispatcher takes care of
-    dispatching the callback in the main thread.
+    Since the callback is dispatched directly, the callback is called in the
+    callback thread.
     """
 
     def on_callback(self, callback, *args):
@@ -138,14 +133,10 @@ class Library(object):
     # references when saving the wrapper callback function in a class with a
     # destructor, as the destructor is not called in that case.
     class CallbackWrapper(object):
-        def __init__(self):
+        def __init__(self, dispatcher):
             self._callbacks = {}
             self._lock = threading.Lock()
-            self._dispatcher = DirectCallbackDispatcher()
-
-        def set_callback_dispatcher(self, dispatcher):
-            with self._lock:
-                self._dispatcher = dispatcher
+            self._dispatcher = dispatcher
 
         def get_callback_ids(self):
             with self._lock:
@@ -190,7 +181,6 @@ class Library(object):
 
     _lib = None
     _refcount = 0
-    _callback_wrapper = CallbackWrapper()
 
     _functions = {
         'tdInit': [None, []],
@@ -295,19 +285,27 @@ class Library(object):
                 # Older version of the lib don't have all the functions
                 pass
 
-    def __init__(self, name=LIBRARY_NAME):
+    def __init__(self, name=None, callback_dispatcher=None):
         """Load and initialize the Telldus core library.
 
-        The library is only initialized the first time this object is
-        created. Subsequent instances uses the same library instance.
+        The underlaying library is only initialized the first time this object
+        is created. Subsequent instances uses the same underlaying library
+        instance.
 
-        :param str name: Default value is the platform specific name of the
-            Telldus library, but it can be e.g. an absolute path.
+        :param str name: If None than the platform specific name of the
+            Telldus library is used, but it can be e.g. an absolute path.
+
+        :param callback_dispatcher: If callbacks are to be used, this parameter
+            must refer to an instance of a class inheriting from
+            :class:`BaseCallbackDispatcher`.
+
         """
         super(Library, self).__init__()
 
         if not Library._lib:
             assert Library._refcount == 0
+            if name is None:
+                name = LIBRARY_NAME
 
             lib = DllLoader.LoadLibrary(name)
             self._setup_functions(lib)
@@ -315,12 +313,19 @@ class Library(object):
             Library._lib = lib
 
         Library._refcount += 1
+        if callback_dispatcher is not None:
+            self._callback_wrapper = Library.CallbackWrapper(
+                callback_dispatcher)
+        else:
+            self._callback_wrapper = None
 
     def __del__(self):
         """Close and unload the Telldus core library.
 
-        Only closed and unloaded if this is the last instance sharing the same
-        library instance.
+        Any callback set up is removed.
+
+        The underlaying library is only closed and unloaded if this is the last
+        instance sharing the same underlaying library instance.
         """
         # Happens if the LoadLibrary call fails
         if not Library._lib:
@@ -330,14 +335,15 @@ class Library(object):
         assert Library._refcount >= 1
         Library._refcount -= 1
 
+        if self._callback_wrapper is not None:
+            for cid in self._callback_wrapper.get_callback_ids():
+                try:
+                    self.tdUnregisterCallback(cid)
+                except:
+                    pass
+
         if Library._refcount != 0:
             return
-
-        for id in Library._callback_wrapper.get_callback_ids():
-            try:
-                self.tdUnregisterCallback(id)
-            except:
-                pass
 
         # telldus-core before v2.1.2 (where tdController was added) does not
         # handle re-initialization after tdClose has been called (see Telldus
@@ -345,13 +351,6 @@ class Library(object):
         if hasattr(Library._lib, "tdController"):
             Library._lib.tdClose()
         Library._lib = None
-
-    def set_callback_dispatcher(self, dispatcher):
-        """Change the callback dispatcher.
-
-        See documentation for :class:`BaseCallbackDispatcher`.
-        """
-        Library._callback_wrapper.set_callback_dispatcher(dispatcher)
 
     def __getattr__(self, name):
         if name in Library._functions:
@@ -368,30 +367,36 @@ class Library(object):
         raise NotImplementedError('should not be called explicitly')
 
     def tdRegisterDeviceEvent(self, callback):
-        return Library._callback_wrapper.register_callback(
+        assert(self._callback_wrapper is not None)
+        return self._callback_wrapper.register_callback(
             self._lib.tdRegisterDeviceEvent, DEVICE_EVENT_FUNC, callback)
 
     def tdRegisterDeviceChangeEvent(self, callback):
-        return Library._callback_wrapper.register_callback(
+        assert(self._callback_wrapper is not None)
+        return self._callback_wrapper.register_callback(
             self._lib.tdRegisterDeviceChangeEvent, DEVICE_CHANGE_EVENT_FUNC,
             callback)
 
     def tdRegisterRawDeviceEvent(self, callback):
-        return Library._callback_wrapper.register_callback(
+        assert(self._callback_wrapper is not None)
+        return self._callback_wrapper.register_callback(
             self._lib.tdRegisterRawDeviceEvent, RAW_DEVICE_EVENT_FUNC,
             callback)
 
     def tdRegisterSensorEvent(self, callback):
-        return Library._callback_wrapper.register_callback(
+        assert(self._callback_wrapper is not None)
+        return self._callback_wrapper.register_callback(
             self._lib.tdRegisterSensorEvent, SENSOR_EVENT_FUNC, callback)
 
     def tdRegisterControllerEvent(self, callback):
-        return Library._callback_wrapper.register_callback(
+        assert(self._callback_wrapper is not None)
+        return self._callback_wrapper.register_callback(
             self._lib.tdRegisterControllerEvent, CONTROLLER_EVENT_FUNC,
             callback)
 
     def tdUnregisterCallback(self, id):
-        Library._callback_wrapper.unregister_callback(id)
+        assert(self._callback_wrapper is not None)
+        self._callback_wrapper.unregister_callback(id)
         self._lib.tdUnregisterCallback(id)
 
     def tdSensor(self):

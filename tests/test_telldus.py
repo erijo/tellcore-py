@@ -17,7 +17,8 @@
 
 import unittest
 
-from tellcore.telldus import TelldusCore, TelldusError, Device, DeviceGroup
+from tellcore.telldus import TelldusCore, TelldusError, Device, DeviceGroup, \
+    QueuedCallbackDispatcher
 from tellcore.constants import *
 import tellcore.library
 
@@ -88,32 +89,32 @@ class Test(unittest.TestCase):
         self.assertEqual(event_args, {id1: callback_args, id3: callback_args})
 
     def test_device_event(self):
-        core = TelldusCore()
+        core = TelldusCore(callback_dispatcher=QueuedCallbackDispatcher())
         self.event_tester(core, core.register_device_event,
                           self.mockdispatcher.trigger_device_event,
                           (c_int(1), c_int(2), c_char_p(b"foo")))
 
     def test_device_change_event(self):
-        core = TelldusCore()
+        core = TelldusCore(callback_dispatcher=QueuedCallbackDispatcher())
         self.event_tester(core, core.register_device_change_event,
                           self.mockdispatcher.trigger_device_change_event,
                           (c_int(3), c_int(4), c_int(5)))
 
     def test_raw_device_event(self):
-        core = TelldusCore()
+        core = TelldusCore(callback_dispatcher=QueuedCallbackDispatcher())
         self.event_tester(core, core.register_raw_device_event,
                           self.mockdispatcher.trigger_raw_device_event,
                           (c_char_p(b"bar"), c_int(6)))
 
     def test_sensor_event(self):
-        core = TelldusCore()
+        core = TelldusCore(callback_dispatcher=QueuedCallbackDispatcher())
         self.event_tester(core, core.register_sensor_event,
                           self.mockdispatcher.trigger_sensor_event,
                           (c_char_p(b"proto"), c_char_p(b"model"), c_int(7),
                            c_int(8), c_char_p(b"value"), c_int(9)))
 
     def test_controller_event(self):
-        core = TelldusCore()
+        core = TelldusCore(callback_dispatcher=QueuedCallbackDispatcher())
         self.event_tester(core, core.register_controller_event,
                           self.mockdispatcher.trigger_controller_event,
                           (c_int(10), c_int(11), c_int(12), c_char_p(b"new")))
