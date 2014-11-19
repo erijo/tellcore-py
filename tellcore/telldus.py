@@ -152,13 +152,13 @@ class TelldusCore(object):
         """
         return self.lib.tdRegisterControllerEvent(callback)
 
-    def unregister_callback(self, id):
+    def unregister_callback(self, cid):
         """Unregister a callback handler.
 
         :param int id: the callback id as returned from one of the
             register_*_event methods.
         """
-        self.lib.tdUnregisterCallback(id)
+        self.lib.tdUnregisterCallback(cid)
 
     def devices(self):
         """Return all known devices.

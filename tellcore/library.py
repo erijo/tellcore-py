@@ -145,13 +145,13 @@ class Library(object):
         def register_callback(self, registrator, functype, callback):
             wrapper = functype(self._callback)
             with self._lock:
-                id = registrator(wrapper, None)
-                self._callbacks[id] = (wrapper, callback)
-                return id
+                cid = registrator(wrapper, None)
+                self._callbacks[cid] = (wrapper, callback)
+                return cid
 
-        def unregister_callback(self, id):
+        def unregister_callback(self, cid):
             with self._lock:
-                del self._callbacks[id]
+                del self._callbacks[cid]
 
         def _callback(self, *in_args):
             args = []
@@ -394,10 +394,10 @@ class Library(object):
             self._lib.tdRegisterControllerEvent, CONTROLLER_EVENT_FUNC,
             callback)
 
-    def tdUnregisterCallback(self, id):
+    def tdUnregisterCallback(self, cid):
         assert(self._callback_wrapper is not None)
-        self._callback_wrapper.unregister_callback(id)
-        self._lib.tdUnregisterCallback(id)
+        self._callback_wrapper.unregister_callback(cid)
+        self._lib.tdUnregisterCallback(cid)
 
     def tdSensor(self):
         """Get the next sensor while iterating.
@@ -406,16 +406,16 @@ class Library(object):
         """
         protocol = create_string_buffer(20)
         model = create_string_buffer(20)
-        id = c_int()
+        sid = c_int()
         datatypes = c_int()
 
         self._lib.tdSensor(protocol, sizeof(protocol), model, sizeof(model),
-                           byref(id), byref(datatypes))
+                           byref(sid), byref(datatypes))
         return {'protocol': self._to_str(protocol),
                 'model': self._to_str(model),
-                'id': id.value, 'datatypes': datatypes.value}
+                'id': sid.value, 'datatypes': datatypes.value}
 
-    def tdSensorValue(self, protocol, model, id, datatype):
+    def tdSensorValue(self, protocol, model, sid, datatype):
         """Get the sensor value for a given sensor.
 
         :return: a dict with the keys: value, timestamp.
@@ -423,7 +423,7 @@ class Library(object):
         value = create_string_buffer(20)
         timestamp = c_int()
 
-        self._lib.tdSensorValue(protocol, model, id, datatype,
+        self._lib.tdSensorValue(protocol, model, sid, datatype,
                                 value, sizeof(value), byref(timestamp))
         return {'value': self._to_str(value), 'timestamp': timestamp.value}
 
@@ -432,18 +432,18 @@ class Library(object):
 
         :return: a dict with the keys: id, type, name, available.
         """
-        id = c_int()
-        type = c_int()
+        cid = c_int()
+        ctype = c_int()
         name = create_string_buffer(255)
         available = c_int()
 
-        self._lib.tdController(byref(id), byref(type), name, sizeof(name),
+        self._lib.tdController(byref(cid), byref(ctype), name, sizeof(name),
                                byref(available))
-        return {'id': id.value, 'type': type.value,
+        return {'id': cid.value, 'type': ctype.value,
                 'name': self._to_str(name), 'available': available.value}
 
-    def tdControllerValue(self, id, name):
+    def tdControllerValue(self, cid, name):
         value = create_string_buffer(255)
 
-        self._lib.tdControllerValue(id, name, value, sizeof(value))
+        self._lib.tdControllerValue(cid, name, value, sizeof(value))
         return self._to_str(value)

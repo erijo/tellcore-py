@@ -169,17 +169,17 @@ class Test(unittest.TestCase):
 
     def setup_callback(self, registered_ids, unregistered_ids):
         def tdRegisterEvent(*args):
-            id_ = len(registered_ids) + 1
-            registered_ids.append(id_)
-            return id_
+            cid = len(registered_ids) + 1
+            registered_ids.append(cid)
+            return cid
         self.mocklib.tdRegisterDeviceEvent = tdRegisterEvent
         self.mocklib.tdRegisterDeviceChangeEvent = tdRegisterEvent
         self.mocklib.tdRegisterRawDeviceEvent = tdRegisterEvent
         self.mocklib.tdRegisterSensorEvent = tdRegisterEvent
         self.mocklib.tdRegisterControllerEvent = tdRegisterEvent
 
-        def tdUnregisterCallback(id_):
-            unregistered_ids.append(id_)
+        def tdUnregisterCallback(cid):
+            unregistered_ids.append(cid)
             return TELLSTICK_SUCCESS
         self.mocklib.tdUnregisterCallback = tdUnregisterCallback
 

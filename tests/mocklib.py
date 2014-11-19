@@ -135,18 +135,18 @@ class MockEventDispatcher(threading.Thread):
         self.start()
 
     def setup_lib_functions(self, mocklib):
-        def tdUnregisterCallback(id_):
-            del self.callbacks[id_]
+        def tdUnregisterCallback(cid):
+            del self.callbacks[cid]
             return 1
         mocklib.tdUnregisterCallback = tdUnregisterCallback
 
         def register_callback(active_list, callback, context):
-            callback_id = self.next_callback_id
+            cid = self.next_callback_id
             self.next_callback_id += 1
 
-            self.callbacks[callback_id] = (callback, context)
-            active_list.append(callback_id)
-            return callback_id
+            self.callbacks[cid] = (callback, context)
+            active_list.append(cid)
+            return cid
 
         callback_types = {
             "tdRegisterDeviceEvent": self.device_callbacks,
@@ -184,10 +184,10 @@ class MockEventDispatcher(threading.Thread):
         self.queue.put((callback, args))
 
     def _trigger_event(self, callback_list, *args):
-        for callback_id in callback_list:
-            if callback_id in self.callbacks:
-                (callback, context) = self.callbacks[callback_id]
-                event_args = args + (callback_id, context)
+        for cid in callback_list:
+            if cid in self.callbacks:
+                (callback, context) = self.callbacks[cid]
+                event_args = args + (cid, context)
                 self.queue_event(callback, *event_args)
         # Make sure all events are delivered
         self.queue.join()
@@ -202,9 +202,9 @@ class MockEventDispatcher(threading.Thread):
     def trigger_raw_device_event(self, data, controller_id):
         self._trigger_event(self.raw_device_callbacks, data, controller_id)
 
-    def trigger_sensor_event(self, protocol, model, id_, dataType, value,
+    def trigger_sensor_event(self, protocol, model, sensor_id, dataType, value,
                              timestamp):
-        self._trigger_event(self.sensor_callbacks, protocol, model, id_,
+        self._trigger_event(self.sensor_callbacks, protocol, model, sensor_id,
                             dataType, value, timestamp)
 
     def trigger_controller_event(self, controller_id, event, type_, new_value):
