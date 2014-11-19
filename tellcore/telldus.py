@@ -104,8 +104,12 @@ class TelldusCore(object):
 
         """
         super(TelldusCore, self).__init__()
-        self.callback_dispatcher = callback_dispatcher
         self.lib = Library(library_path, callback_dispatcher)
+
+    def __getattr__(self, name):
+        if name == 'callback_dispatcher':
+            return self.lib.callback_dispatcher
+        raise AttributeError(name)
 
     def register_device_event(self, callback):
         """Register a new device event callback handler.

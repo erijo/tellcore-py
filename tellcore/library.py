@@ -353,6 +353,8 @@ class Library(object):
         Library._lib = None
 
     def __getattr__(self, name):
+        if name == 'callback_dispatcher':
+            return self._callback_wrapper._dispatcher
         if name in Library._functions:
             return getattr(self._lib, name)
         raise AttributeError(name)
