@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.1.0 (TBD)
------------
+1.1.0 (2014-11-19)
+------------------
 
 * The callback dispatcher is no longer global, but tied to a ``Library``
   instance. Applications wishing to use callbacks must now pass an explicit
