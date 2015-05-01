@@ -40,7 +40,7 @@ def print_devices(devices):
         else:
             cmd_str = "UNKNOWN:{}".format(cmd)
         params_str = ""
-        for name, value in device.parameters().iteritems():
+        for name, value in device.parameters().items():
             params_str += "{}:{} ".format(name, value)
         print("{:<5d} {:<15s} {:<10s} {:<10s} {:<20s} {}".format(
                 device.id, device.name, cmd_str,

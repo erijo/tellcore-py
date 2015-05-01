@@ -1,6 +1,12 @@
 Changelog
 =========
 
+TBD
+---
+
+* Fixed a bug that made tellcore_tool not work with Python 3.x.
+
+
 1.1.0 (2014-11-19)
 ------------------
 
