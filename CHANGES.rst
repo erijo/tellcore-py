@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Working
--------
+1.1.2 (2015-06-24)
+------------------
 
 * Added option to ``Library`` to make it possible to select if strings should
   be decoded or not.
