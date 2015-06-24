@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Working
+-------
+
+* Added option to ``Library`` to make it possible to select if strings should
+  be decoded or not.
+
+* Made tellcore_tool not decode strings (i.e. convert to unicode) when running
+  under Python 2.x to avoid unicode errors when printing non ascii characters.
+
+
 1.1.1 (2015-05-01)
 ------------------
 

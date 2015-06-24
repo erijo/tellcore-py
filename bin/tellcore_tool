@@ -17,10 +17,15 @@
 # USA
 
 import argparse
+import sys
 import time
 
 import tellcore.telldus as td
 import tellcore.constants as const
+
+if sys.version_info < (3, 0):
+    import tellcore.library as lib
+    lib.Library.DECODE_STRINGS = False
 
 def print_devices(devices):
     print("Number of devices: {}\n".format(len(devices)))

@@ -113,6 +113,7 @@ class Library(object):
     """
 
     STRING_ENCODING = 'utf-8'
+    DECODE_STRINGS = True
 
     class c_string_p(c_char_p):
         def __init__(self, param):
@@ -265,7 +266,8 @@ class Library(object):
             string = cast(result, c_char_p).value
             if string is not None:
                 lib.tdReleaseString(result)
-                string = string.decode(Library.STRING_ENCODING)
+                if Library.DECODE_STRINGS:
+                    string = string.decode(Library.STRING_ENCODING)
             return string
 
         for name, signature in Library._functions.items():
