@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Working (TBD)
+-------------
+
+* Added datetime attribute to ``SensorValue``.
+
+
 1.1.2 (2015-06-24)
 ------------------
 

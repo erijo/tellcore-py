@@ -24,6 +24,8 @@ except ImportError:
 import tellcore.constants as const
 from tellcore.library import Library, TelldusError, BaseCallbackDispatcher
 
+from datetime import datetime
+
 
 class QueuedCallbackDispatcher(BaseCallbackDispatcher):
     """The default callback dispatcher used by :class:`TelldusCore`.
@@ -500,13 +502,16 @@ class SensorValue(object):
     Returned from :func:`Sensor.value`.
     """
 
-    __slots__ = ["datatype", "value", "timestamp"]
-
     def __init__(self, datatype, value, timestamp):
         super(SensorValue, self).__init__()
         self.datatype = datatype
         self.value = value
         self.timestamp = timestamp
+
+    def __getattr__(self, name):
+        if name == "datetime":
+            return datetime.fromtimestamp(self.timestamp)
+        raise AttributeError(name)
 
 
 class Controller(object):

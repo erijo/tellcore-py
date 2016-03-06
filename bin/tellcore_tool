@@ -61,7 +61,7 @@ def print_sensors(sensors):
         if not sensor.has_value(datatype):
             return ("", None)
         value = sensor.value(datatype)
-        return (formatter(value.value), value.timestamp)
+        return (formatter(value.value), value.datetime)
 
     for sensor in sensors:
         values = []
@@ -93,8 +93,8 @@ def print_sensors(sensors):
         values_str += "{:<20s} ".format(s[4] + s[5] + s[6])
 
         print("{:<15s} {:<15s} {:<5d} {}{}".format(
-                sensor.protocol, sensor.model, sensor.id, values_str,
-                time.strftime("%F %T", time.localtime(timestamp))))
+            sensor.protocol, sensor.model, sensor.id, values_str,
+            timestamp))
 
 def find_device(device, devices):
     for d in devices:
