@@ -12,5 +12,6 @@ tests:
 	pypy ./run_tests
 	flake8 tellcore
 	flake8 bin
-#       Ignore "from tellcore.constants import *"
-	flake8 --ignore=F403 tests
+#       Ignore F403: "from tellcore.constants import *"
+#       Ignore E731: "do not assign a lambda expression, use a def"
+	flake8 --ignore=F403,E731 tests
