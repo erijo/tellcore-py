@@ -60,6 +60,8 @@ unpacking it. Then change directory to tellcore-py and run:
 Users
 -----
 
+* `Home Assistant <https://home-assistant.io>`_ - Open-source home automation
+  platform running on Python 3
 * `Tellprox <https://github.com/p3tecracknell/tellprox/>`_ - A local server to
   use in place of Telldus Live
 * `tellive-py <https://github.com/erijo/tellive-py>`_ - A Python wrapper for
