@@ -6,6 +6,9 @@ Working (TBD)
 
 * Added datetime attribute to ``SensorValue``.
 
+* Fixed strange problem in ``Library`` where the class itself could
+  sometimes be None in ``__del__``.
+
 
 1.1.2 (2015-06-24)
 ------------------

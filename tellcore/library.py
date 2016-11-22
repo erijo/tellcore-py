@@ -329,13 +329,16 @@ class Library(object):
         The underlaying library is only closed and unloaded if this is the last
         instance sharing the same underlaying library instance.
         """
+        # Using self.__class__.* instead of Library.* here to avoid a
+        # strange problem where Library could, in some runs, be None.
+
         # Happens if the LoadLibrary call fails
-        if not Library._lib:
-            assert Library._refcount == 0
+        if self.__class__._lib is None:
+            assert self.__class__._refcount == 0
             return
 
-        assert Library._refcount >= 1
-        Library._refcount -= 1
+        assert self.__class__._refcount >= 1
+        self.__class__._refcount -= 1
 
         if self._callback_wrapper is not None:
             for cid in self._callback_wrapper.get_callback_ids():
@@ -344,15 +347,15 @@ class Library(object):
                 except:
                     pass
 
-        if Library._refcount != 0:
+        if self.__class__._refcount != 0:
             return
 
         # telldus-core before v2.1.2 (where tdController was added) does not
         # handle re-initialization after tdClose has been called (see Telldus
         # ticket 188).
-        if hasattr(Library._lib, "tdController"):
-            Library._lib.tdClose()
-        Library._lib = None
+        if hasattr(self.__class__._lib, "tdController"):
+            self.__class__._lib.tdClose()
+        self.__class__._lib = None
 
     def __getattr__(self, name):
         if name == 'callback_dispatcher':
