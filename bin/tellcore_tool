@@ -29,7 +29,7 @@ if sys.version_info < (3, 0):
 
 def print_devices(devices):
     print("Number of devices: {}\n".format(len(devices)))
-    print("{:<5s} {:<15s} {:<10s} {:<10s} {:<20s} {}".format(
+    print("{:<5s} {:<25s} {:<10s} {:<10s} {:<20s} {}".format(
             "ID", "NAME", "STATE", "PROTOCOL", "MODEL", "PARAMETERS"))
     for device in devices:
         cmd = device.last_sent_command(
@@ -46,8 +46,8 @@ def print_devices(devices):
             cmd_str = "UNKNOWN:{}".format(cmd)
         params_str = ""
         for name, value in device.parameters().items():
-            params_str += "{}:{} ".format(name, value)
-        print("{:<5d} {:<15s} {:<10s} {:<10s} {:<20s} {}".format(
+            params_str += " {}:{}".format(name, value)
+        print("{:<5d} {:<25s} {:<10s} {:<10s} {:<20s}{}".format(
                 device.id, device.name, cmd_str,
                 device.protocol, device.model, params_str))
 
