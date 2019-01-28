@@ -48,7 +48,7 @@ Installation
 
     $ pip install tellcore-py
 
-Can also be installed by cloning the `GIP repository
+Can also be installed by cloning the `GIT repository
 <https://github.com/erijo/tellcore-py>`_ or downloading the `ZIP archive
 <https://github.com/erijo/tellcore-py/archive/master.zip>`_ from GitHub and
 unpacking it. Then change directory to tellcore-py and run:
